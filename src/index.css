@@ -1,3 +1,19 @@
+/* src/index.css */
+
 body {
   margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.App {
+  text-align: center;
+}
+
+.container {
+  max-width: 800px;
+}
+
+.btn {
+  cursor: pointer;
 }
