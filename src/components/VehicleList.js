@@ -13,7 +13,6 @@ function VehicleList() {
     { id: 7, make: "Kia", model: "Optima", year: 2022, price: 25300 },
     { id: 8, make: "Volkswagen", model: "Passat", year: 2024, price: 27500 },
     { id: 9, make: "Subaru", model: "Legacy", year: 2023, price: 24500 },
-    { id: 10, make: "Mazda", model: "Mazda6", year: 2021, price: 29000 },
   ];
 
   return (
