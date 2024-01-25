@@ -12,17 +12,13 @@ function HomePage() {
     <div>
       <nav className="navbar navbar-light bg-primary">
         <div className="container-fluid">
-          <span
-            className="navbar-brand mb-0 ms-2 h2 text-light"
-            style={{ fontSize: "1.5rem" }}
-          >
+          <span className="navbar-brand mb-0 ms-2 h2 text-light" style={{ fontSize: "1.5rem" }}>
             AutoConnect
           </span>
         </div>
       </nav>
       <div
-        className="container d-flex justify-content-between
-         align-items-center px-3 mt-3"
+        className="container d-flex justify-content-between align-items-center px-3 mt-3"
         style={{ maxWidth: "80%" }}
       >
         <AddVehicle />

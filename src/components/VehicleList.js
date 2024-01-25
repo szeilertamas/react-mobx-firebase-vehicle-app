@@ -1,6 +1,7 @@
 // src/components/VehicleList.js
 
 import React from "react";
+import { Link } from "react-router-dom";
 
 function VehicleList() {
   const dummyVehicles = [
@@ -37,7 +38,9 @@ function VehicleList() {
               <td>{vehicle.year}</td>
               <td>€ {vehicle.price}</td>
               <td>
-                <button className="btn btn-outline-primary me-2">Edit</button>
+                <Link to={`/edit/${vehicle.id}`} className="btn btn-outline-primary me-2">
+                  Edit
+                </Link>
                 <button className="btn btn-outline-danger">Delete</button>
               </td>
             </tr>
@@ -49,3 +52,4 @@ function VehicleList() {
 }
 
 export default VehicleList;
+

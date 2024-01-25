@@ -3,10 +3,12 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
-.App {
+h1,
+h2,
+h3 {
   text-align: center;
 }
 
