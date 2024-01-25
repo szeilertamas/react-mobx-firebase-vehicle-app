@@ -1,23 +1,20 @@
 // src/components/VehicleList.js
 
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { observer } from 'mobx-react-lite';
+import { useRootStore } from '../stores/RootStore';
+import { useNavigate } from 'react-router-dom';
 
-function VehicleList() {
-  const dummyVehicles = [
-    { id: 1, make: "Toyota", model: "Camry", year: 2022, price: 25000 },
-    { id: 2, make: "Honda", model: "Accord", year: 2021, price: 28000 },
-    { id: 3, make: "Ford", model: "Fusion", year: 2020, price: 26000 },
-    { id: 4, make: "Chevrolet", model: "Malibu", year: 2024, price: 27000 },
-    { id: 5, make: "Nissan", model: "Altima", year: 2023, price: 25500 },
-    { id: 6, make: "Hyundai", model: "Sonata", year: 2020, price: 26500 },
-    { id: 7, make: "Kia", model: "Optima", year: 2022, price: 25300 },
-    { id: 8, make: "Volkswagen", model: "Passat", year: 2024, price: 27500 },
-    { id: 9, make: "Subaru", model: "Legacy", year: 2023, price: 24500 },
-  ];
+const VehicleList = observer(() => {
+  const { vehicleStore } = useRootStore();
+  const navigate = useNavigate();
+
+  const handleEditClick = (id) => {
+    navigate(`/edit/${id}`);
+  };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: "80%" }}>
+    <div className="container mt-5 table-container">
       <table className="table table-hover">
         <thead className="thead-light">
           <tr>
@@ -30,7 +27,7 @@ function VehicleList() {
           </tr>
         </thead>
         <tbody>
-          {dummyVehicles.map((vehicle) => (
+          {vehicleStore.vehicles.map((vehicle) => (
             <tr key={vehicle.id}>
               <td>{vehicle.id}</td>
               <td>{vehicle.make}</td>
@@ -38,10 +35,18 @@ function VehicleList() {
               <td>{vehicle.year}</td>
               <td>€ {vehicle.price}</td>
               <td>
-                <Link to={`/edit/${vehicle.id}`} className="btn btn-outline-primary me-2">
+                <button
+                  className="btn btn-outline-primary me-2"
+                  onClick={() => handleEditClick(vehicle.id)}
+                >
                   Edit
-                </Link>
-                <button className="btn btn-outline-danger">Delete</button>
+                </button>
+                <button
+                  className="btn btn-outline-danger"
+                  onClick={() => vehicleStore.deleteVehicle(vehicle.id)}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
@@ -49,7 +54,6 @@ function VehicleList() {
       </table>
     </div>
   );
-}
+});
 
 export default VehicleList;
-

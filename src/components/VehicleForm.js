@@ -20,48 +20,62 @@ const VehicleForm = ({ onSubmit, onCancel, initialValues }) => {
       <h3>{initialValues ? "Edit Vehicle" : "Add Vehicle"}</h3>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label className="form-label">Make:</label>
+          <label htmlFor="make" className="form-label">
+            Make
+          </label>
           <input
             type="text"
             className="form-control"
+            id="make"
             name="make"
-            value={formData.make || ""}
+            value={formData.make || ''}
             onChange={handleChange}
+            required
           />
         </div>
         <div className="mb-3">
-          <label className="form-label">Model:</label>
+          <label htmlFor="model" className="form-label">
+            Model
+          </label>
           <input
             type="text"
             className="form-control"
+            id="model"
             name="model"
-            value={formData.model || ""}
+            value={formData.model || ''}
             onChange={handleChange}
+            required
           />
         </div>
         <div className="mb-3">
-          <label className="form-label">Year:</label>
+          <label htmlFor="year" className="form-label">
+            Year
+          </label>
           <input
             type="number"
             className="form-control"
+            id="year"
             name="year"
-            value={formData.year || ""}
+            value={formData.year || ''}
             onChange={handleChange}
+            required
           />
         </div>
         <div className="mb-3">
-          <label className="form-label">Price:</label>
+          <label htmlFor="price" className="form-label">
+            Price
+          </label>
           <input
             type="number"
             className="form-control"
+            id="price"
             name="price"
-            value={formData.price || ""}
+            value={formData.price || ''}
             onChange={handleChange}
+            required
           />
         </div>
-        <div className="mb-3">
-        </div>
-        <div className="mb-3">
+        <div className="mb-3 text-center">
           <button type="submit" className="btn btn-primary me-2">
             {initialValues ? "Update" : "Add"}
           </button>

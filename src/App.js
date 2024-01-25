@@ -9,7 +9,7 @@ import EditVehiclePage from './pages/EditVehiclePage';
 function App() {
   return (
     <Router>
-      <div className="App">
+      <div>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/add" element={<AddVehiclePage />} />

@@ -6,9 +6,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-h1,
-h2,
-h3 {
+h1, h2, h3 {
   text-align: center;
 }
 
@@ -18,4 +16,18 @@ h3 {
 
 .btn {
   cursor: pointer;
+}
+
+/* Styling for VehicleList */
+.table-container {
+  max-width: 80%;
+}
+
+.table-container table {
+  width: 100%;
+}
+
+.table-container th,
+.table-container td {
+  text-align: center;
 }

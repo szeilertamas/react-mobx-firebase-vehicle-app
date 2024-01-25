@@ -2,20 +2,19 @@
 
 import React from "react";
 import VehicleForm from "../components/VehicleForm";
+import { useRootStore } from "../stores/RootStore";
 import { useNavigate } from "react-router-dom";
 
 const AddVehiclePage = () => {
+  const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
   const handleAddVehicle = (formData) => {
-    console.log("Adding Vehicle:", formData);
-
+    vehicleStore.addVehicle(formData);
     navigate("/");
   };
 
   const handleCancel = () => {
-    console.log("Add Vehicle canceled");
-
     navigate("/");
   };
 
