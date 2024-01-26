@@ -1,15 +1,25 @@
 // src/stores/RootStore.js
 
 import React, { createContext, useContext } from 'react';
+import { makeObservable, observable, action } from 'mobx';
 import VehicleStore from './VehicleStore';
 
 const RootStoreContext = createContext();
 
-const RootStoreProvider = ({ children }) => {
-  const rootStore = {
-    vehicleStore: new VehicleStore(),
-  };
+class RootStore {
+  vehicleStore;
 
+  constructor() {
+    this.vehicleStore = new VehicleStore();
+    makeObservable(this, {
+      vehicleStore: observable,
+    });
+  }
+}
+
+const rootStore = new RootStore();
+
+const RootStoreProvider = ({ children }) => {
   return (
     <RootStoreContext.Provider value={rootStore}>
       {children}

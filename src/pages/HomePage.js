@@ -1,13 +1,21 @@
-// src/components/HomePage.js
+// src/pages/HomePage.js
 
-import React from "react";
+import React, { useEffect } from "react";
 import VehicleList from "../components/VehicleList";
 import AddVehicle from "../components/AddVehicle";
 import Filtering from "../components/Filtering";
 import Sorting from "../components/Sorting";
 import Paging from "../components/Paging";
+import { useRootStore } from "../stores/RootStore";
 
 function HomePage() {
+  const { vehicleStore } = useRootStore();
+
+  useEffect(() => {
+    vehicleStore.loadVehicleMakes();
+    vehicleStore.loadVehicleModels();
+  }, [vehicleStore]);
+
   return (
     <div>
       <nav className="navbar navbar-light bg-primary">

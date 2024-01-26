@@ -1,6 +1,6 @@
 // src/components/VehicleList.js
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,29 @@ import { useNavigate } from 'react-router-dom';
 const VehicleList = observer(() => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
+  const [combinedVehicles, setCombinedVehicles] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await vehicleStore.loadVehicleMakes();
+      await vehicleStore.loadVehicleModels();
+
+      const combinedData = vehicleStore.vehicleModels.map((model) => {
+        const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
+        return {
+          id: model.id,
+          make: make ? make.name : '',
+          model: model.name,
+          year: model.year,
+          price: model.price,
+        };
+      });
+
+      setCombinedVehicles(combinedData);
+    };
+
+    fetchData();
+  }, [vehicleStore]);
 
   const handleEditClick = (id) => {
     navigate(`/edit/${id}`);
@@ -18,7 +41,7 @@ const VehicleList = observer(() => {
       <table className="table table-hover">
         <thead className="thead-light">
           <tr>
-            <th>Id</th>
+            <th>#</th>
             <th>Make</th>
             <th>Model</th>
             <th>Year</th>
@@ -27,9 +50,9 @@ const VehicleList = observer(() => {
           </tr>
         </thead>
         <tbody>
-          {vehicleStore.vehicles.map((vehicle) => (
+          {combinedVehicles.map((vehicle, index) => (
             <tr key={vehicle.id}>
-              <td>{vehicle.id}</td>
+              <td>{index + 1}</td>
               <td>{vehicle.make}</td>
               <td>{vehicle.model}</td>
               <td>{vehicle.year}</td>

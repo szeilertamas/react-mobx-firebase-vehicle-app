@@ -1,53 +1,63 @@
 // src/stores/VehicleStore.js
 
 import { makeObservable, observable, action } from 'mobx';
+import { vehicleMakeService } from '../services/VehicleMakeService';
+import { vehicleModelService } from '../services/VehicleModelService';
+import { useRootStore } from './RootStore';
 
 class VehicleStore {
-  vehicles = [
-    { id: 1, make: 'Toyota', model: 'Camry', year: 2022, price: 25000 },
-    { id: 2, make: "Honda", model: "Accord", year: 2021, price: 28000 },
-    { id: 3, make: "Ford", model: "Fusion", year: 2020, price: 26000 },
-    { id: 4, make: "Chevrolet", model: "Malibu", year: 2024, price: 27000 },
-    { id: 5, make: "Nissan", model: "Altima", year: 2023, price: 25500 },
-    { id: 6, make: "Hyundai", model: "Sonata", year: 2020, price: 26500 },
-    { id: 7, make: "Kia", model: "Optima", year: 2022, price: 25300 },
-    { id: 8, make: "Volkswagen", model: "Passat", year: 2024, price: 27500 },
-    { id: 9, make: "Subaru", model: "Legacy", year: 2023, price: 24500 },
-  ];
+  vehicleMakes = [];
+  vehicleModels = [];
 
-  getVehicleById(id) {
-    return this.vehicles.find((vehicle) => vehicle.id === parseInt(id));
-  }
-
-  addVehicle(vehicle) {
-    const lastVehicle = this.vehicles[this.vehicles.length - 1];
-    const newId = lastVehicle ? lastVehicle.id + 1 : 1;
-    
-    const newVehicle = {
-      id: newId,
-      make: vehicle.make,
-      model: vehicle.model,
-      year: vehicle.year,
-      price: vehicle.price,
-    };
-
-    this.vehicles.push(newVehicle);
-  }
-
-  updateVehicle(id, updatedVehicle) {
-    const index = this.vehicles.findIndex((v) => v.id === id);
-    if (index !== -1) {
-      this.vehicles[index] = updatedVehicle;
+  async loadVehicleMakes() {
+    try {
+      this.vehicleMakes = await vehicleMakeService.getAll();
+    } catch (error) {
+      console.error('Error loading vehicle makes:', error);
     }
   }
 
-  deleteVehicle(id) {
-    this.vehicles = this.vehicles.filter((v) => v.id !== id);
+  async loadVehicleModels() {
+    try {
+      this.vehicleModels = await vehicleModelService.getAll();
+    } catch (error) {
+      console.error('Error loading vehicle models:', error);
+    }
+  }
+
+  async addVehicle(vehicle) {
+    try {
+      await vehicleMakeService.add(vehicle);
+      await this.loadVehicleMakes();
+    } catch (error) {
+      console.error('Error adding vehicle:', error);
+    }
+  }
+
+  async updateVehicle(id, updatedVehicle) {
+    try {
+      await vehicleMakeService.update(id, updatedVehicle);
+      await this.loadVehicleMakes();
+    } catch (error) {
+      console.error('Error updating vehicle:', error);
+    }
+  }
+
+  async deleteVehicle(id) {
+    try {
+      await vehicleMakeService.delete(id);
+      await this.loadVehicleMakes();
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+    }
   }
 
   constructor() {
     makeObservable(this, {
-      vehicles: observable,
+      vehicleMakes: observable,
+      vehicleModels: observable,
+      loadVehicleMakes: action,
+      loadVehicleModels: action,
       addVehicle: action,
       updateVehicle: action,
       deleteVehicle: action,
