@@ -1,7 +1,7 @@
 // src/services/BaseService.js
 
-import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore'; // Added getDoc
-import { db } from './firebaseConfig';
+import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { db } from './FirebaseConfig';
 
 class BaseService {
   constructor(collectionName) {
@@ -27,8 +27,14 @@ class BaseService {
 
   async update(id, data) {
     const docRef = doc(this.collection, id);
-    await updateDoc(docRef, data);
-    return { id, ...data };
+
+    try {
+      await updateDoc(docRef, data);
+      return { id, ...data };
+    } catch (error) {
+      console.error('Error updating document:', error);
+      throw error;
+    }
   }
 
   async delete(id) {

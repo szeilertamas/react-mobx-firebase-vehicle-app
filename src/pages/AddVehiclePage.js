@@ -18,9 +18,20 @@ const AddVehiclePage = () => {
     navigate("/");
   };
 
+  const initialValues = {
+    make: "",
+    model: "",
+    year: "",
+    price: "",
+  };
+
   return (
     <div>
-      <VehicleForm onSubmit={handleAddVehicle} onCancel={handleCancel} />
+      <VehicleForm
+        onSubmit={handleAddVehicle}
+        onCancel={handleCancel}
+        initialValues={initialValues}
+      />
     </div>
   );
 };

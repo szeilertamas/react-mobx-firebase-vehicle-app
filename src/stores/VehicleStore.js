@@ -3,7 +3,6 @@
 import { makeObservable, observable, action } from 'mobx';
 import { vehicleMakeService } from '../services/VehicleMakeService';
 import { vehicleModelService } from '../services/VehicleModelService';
-import { useRootStore } from './RootStore';
 
 class VehicleStore {
   vehicleMakes = [];
@@ -27,8 +26,19 @@ class VehicleStore {
 
   async addVehicle(vehicle) {
     try {
-      await vehicleMakeService.add(vehicle);
+      const make = await vehicleMakeService.add({ name: vehicle.make });
+      
+      const vehicleModel = {
+        makeId: make.id,
+        name: vehicle.model,
+        year: vehicle.year,
+        price: vehicle.price,
+      };
+
+      await vehicleModelService.add(vehicleModel);
+
       await this.loadVehicleMakes();
+      await this.loadVehicleModels();
     } catch (error) {
       console.error('Error adding vehicle:', error);
     }
@@ -36,8 +46,33 @@ class VehicleStore {
 
   async updateVehicle(id, updatedVehicle) {
     try {
-      await vehicleMakeService.update(id, updatedVehicle);
+      const existingVehicle = await vehicleModelService.getById(id);
+  
+      if (!existingVehicle) {
+        console.error(`Vehicle with ID ${id} not found.`);
+        return;
+      }
+  
+      await vehicleModelService.update(id, {
+        name: updatedVehicle.model,
+        price: updatedVehicle.price,
+        year: updatedVehicle.year,
+      });
+  
+      if (updatedVehicle.makeId) {
+        const make = await vehicleMakeService.getById(updatedVehicle.makeId);
+  
+        if (make) {
+          await vehicleMakeService.update(updatedVehicle.makeId, {
+            name: updatedVehicle.make,
+          });
+        } else {
+          console.error(`Make with ID ${updatedVehicle.makeId} not found.`);
+        }
+      }
+  
       await this.loadVehicleMakes();
+      await this.loadVehicleModels();
     } catch (error) {
       console.error('Error updating vehicle:', error);
     }
@@ -45,11 +80,20 @@ class VehicleStore {
 
   async deleteVehicle(id) {
     try {
-      await vehicleMakeService.delete(id);
-      await this.loadVehicleMakes();
+      const vehicleToDelete = this.vehicleModels.find((vehicle) => vehicle.id === id);
+      if (vehicleToDelete) {
+        await vehicleModelService.delete(id);
+        await vehicleMakeService.delete(vehicleToDelete.makeId);
+        await this.loadVehicleMakes();
+        await this.loadVehicleModels();
+      }
     } catch (error) {
       console.error('Error deleting vehicle:', error);
     }
+  }
+
+  getVehicleById(id) {
+    return this.vehicleModels.find((vehicle) => vehicle.id === id);
   }
 
   constructor() {
@@ -61,6 +105,7 @@ class VehicleStore {
       addVehicle: action,
       updateVehicle: action,
       deleteVehicle: action,
+      getVehicleById: action,
     });
   }
 }

@@ -1,4 +1,4 @@
-// src/services/firebaseConfig.js
+// src/services/FirebaseConfig.js
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from 'firebase/firestore';
