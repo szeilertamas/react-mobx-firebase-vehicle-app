@@ -7,6 +7,8 @@ import { vehicleModelService } from '../services/VehicleModelService';
 class VehicleStore {
   vehicleMakes = [];
   vehicleModels = [];
+  currentPage = 1;
+  itemsPerPage = 9;
 
   async loadVehicleMakes() {
     try {
@@ -122,16 +124,35 @@ class VehicleStore {
     return foundVehicle;
   }
 
+  setCurrentPage(page) {
+    this.currentPage = page;
+  }
+
+  calculateTotalPages() {
+    return Math.ceil(this.vehicleModels.length / this.itemsPerPage);
+  }
+
+  paginate(items) {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return items.slice(startIndex, endIndex);
+  }
+
   constructor() {
     makeObservable(this, {
       vehicleMakes: observable,
       vehicleModels: observable,
+      currentPage: observable,
+      itemsPerPage: observable,
       loadVehicleMakes: action,
       loadVehicleModels: action,
       addVehicle: action,
       updateVehicle: action,
       deleteVehicle: action,
       getVehicleById: action,
+      setCurrentPage: action,
+      calculateTotalPages: action,
+      paginate: action,
     });
   }
 }

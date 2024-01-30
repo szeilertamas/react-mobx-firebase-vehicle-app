@@ -5,7 +5,6 @@ import VehicleList from "../components/VehicleList";
 import AddVehicle from "../components/AddVehicle";
 import Filtering from "../components/Filtering";
 import Sorting from "../components/Sorting";
-import Paging from "../components/Paging";
 import { useRootStore } from "../stores/RootStore";
 
 function HomePage() {
@@ -38,9 +37,6 @@ function HomePage() {
         <Sorting />
       </div>
       <VehicleList />
-      <div className="m-4">
-        <Paging />
-      </div>
     </div>
   );
 }

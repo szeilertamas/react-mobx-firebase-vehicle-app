@@ -1,7 +1,10 @@
+// src/components/VehicleList.js
+
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
+import Paging from './Paging';
 
 const VehicleList = observer(() => {
   const { vehicleStore } = useRootStore();
@@ -24,6 +27,12 @@ const VehicleList = observer(() => {
     navigate(`/edit/${id}`);
   };
 
+  const handlePageChange = async (page) => {
+    console.log('Changing page to', page);
+    await vehicleStore.setCurrentPage(page);
+    console.log('Current page after change', vehicleStore.currentPage);
+  };
+
   return (
     <div className="container mt-5 table-container">
       <table className="table table-hover">
@@ -38,11 +47,12 @@ const VehicleList = observer(() => {
           </tr>
         </thead>
         <tbody>
-          {vehicleStore.vehicleModels.map((model, index) => {
+          {vehicleStore.paginate(vehicleStore.vehicleModels).map((model, index) => {
             const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
+            const uniqueIndex = (vehicleStore.currentPage - 1) * vehicleStore.itemsPerPage + index + 1;
             return (
               <tr key={model.id}>
-                <td>{index + 1}</td>
+                <td>{uniqueIndex}</td>
                 <td>{make ? make.name : ''}</td>
                 <td>{model.name}</td>
                 <td>{model.year}</td>
@@ -66,6 +76,15 @@ const VehicleList = observer(() => {
           })}
         </tbody>
       </table>
+      <div className="m-4">
+        <Paging
+          currentPage={vehicleStore.currentPage}
+          totalPages={vehicleStore.calculateTotalPages()}
+          goToNextPage={() => handlePageChange(vehicleStore.currentPage + 1)}
+          goToPrevPage={() => handlePageChange(vehicleStore.currentPage - 1)}
+          goToPage={(page) => handlePageChange(page)}
+        />
+      </div>
     </div>
   );
 });
