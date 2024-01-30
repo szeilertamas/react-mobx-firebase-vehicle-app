@@ -11,19 +11,37 @@ const EditVehiclePage = () => {
   const { vehicleStore } = useRootStore();
 
   const [loading, setLoading] = useState(true);
+  const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      await vehicleStore.loadVehicleModels();
-      await vehicleStore.loadVehicleMakes();
-      const initialData = vehicleStore.getVehicleById(id);
-      if (!initialData) {
-        console.error(`Vehicle with ID ${id} not found.`);
-        navigate("/");
-        return;
-      }
+      try {
+        await vehicleStore.loadVehicleModels();
+        await vehicleStore.loadVehicleMakes();
 
-      setLoading(false);
+        const initialData = vehicleStore.getVehicleById(id);
+
+        if (!initialData) {
+          console.error(`Vehicle with ID ${id} not found.`);
+          navigate("/");
+          return;
+        }
+
+        const initialMakeId = initialData.makeId;
+        const initialMakeDocument = await vehicleStore.getMakeById(initialMakeId);
+
+        setInitialValues({
+          ...initialData,
+          model: initialData.name || "",
+          make: initialMakeDocument?.name || "",
+          makeId: initialMakeId || "",
+        });
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        navigate("/");
+      }
     };
 
     fetchData();
@@ -33,40 +51,23 @@ const EditVehiclePage = () => {
     return <div>Loading...</div>;
   }
 
-  const initialData = vehicleStore.getVehicleById(id);
-
-  if (!initialData) {
-    console.error(`Vehicle with ID ${id} not found.`);
+  if (!initialValues) {
+    console.error(`Initial values not available.`);
     navigate("/");
     return null;
   }
 
-  const initialMakeId = initialData.makeId;
-
-  const initialMake = vehicleStore.vehicleMakes.find((make) => make.id === initialMakeId);
-
-  const initialModel = vehicleStore.vehicleModels.find(
-    (model) => model.makeId === initialMakeId
-  );
-
-  const initialValues = {
-    ...initialData,
-    model: initialModel?.name || "",
-    make: initialMake?.name || "",
-    makeId: initialMake?.id || "",
-  };
-
   const handleUpdateVehicle = async (formData) => {
     await vehicleStore.loadVehicleMakes();
-
+  
     const selectedMake = vehicleStore.vehicleMakes.find((make) => make.name === formData.make);
-
+  
     if (selectedMake) {
       formData.makeId = selectedMake.id;
     }
-
-    await vehicleStore.updateVehicle(id, formData);
-
+  
+    vehicleStore.updateVehicle(id, formData);
+  
     navigate("/");
   };
 

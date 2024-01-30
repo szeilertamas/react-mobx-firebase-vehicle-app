@@ -1,6 +1,4 @@
-// src/components/VehicleList.js
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
@@ -8,25 +6,15 @@ import { useNavigate } from 'react-router-dom';
 const VehicleList = observer(() => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
-  const [combinedVehicles, setCombinedVehicles] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      await vehicleStore.loadVehicleMakes();
-      await vehicleStore.loadVehicleModels();
-
-      const combinedData = vehicleStore.vehicleModels.map((model) => {
-        const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
-        return {
-          id: model.id,
-          make: make ? make.name : '',
-          model: model.name,
-          year: model.year,
-          price: model.price,
-        };
-      });
-
-      setCombinedVehicles(combinedData);
+      try {
+        await vehicleStore.loadVehicleMakes();
+        await vehicleStore.loadVehicleModels();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
 
     fetchData();
@@ -50,29 +38,32 @@ const VehicleList = observer(() => {
           </tr>
         </thead>
         <tbody>
-          {combinedVehicles.map((vehicle, index) => (
-            <tr key={vehicle.id}>
-              <td>{index + 1}</td>
-              <td>{vehicle.make}</td>
-              <td>{vehicle.model}</td>
-              <td>{vehicle.year}</td>
-              <td>€ {vehicle.price}</td>
-              <td>
-                <button
-                  className="btn btn-outline-primary me-2"
-                  onClick={() => handleEditClick(vehicle.id)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-outline-danger"
-                  onClick={() => vehicleStore.deleteVehicle(vehicle.id)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+          {vehicleStore.vehicleModels.map((model, index) => {
+            const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
+            return (
+              <tr key={model.id}>
+                <td>{index + 1}</td>
+                <td>{make ? make.name : ''}</td>
+                <td>{model.name}</td>
+                <td>{model.year}</td>
+                <td>€ {model.price}</td>
+                <td>
+                  <button
+                    className="btn btn-outline-primary me-2"
+                    onClick={() => handleEditClick(model.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-outline-danger"
+                    onClick={() => vehicleStore.deleteVehicle(model.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

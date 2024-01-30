@@ -1,9 +1,13 @@
 // src/components/VehicleForm.js
 
-import React from "react";
+import React, { useEffect } from "react";
 
 const VehicleForm = ({ onSubmit, onCancel, initialValues }) => {
   const [formData, setFormData] = React.useState(initialValues);
+
+  useEffect(() => {
+    setFormData(initialValues);
+  }, [initialValues]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

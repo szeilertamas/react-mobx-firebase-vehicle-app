@@ -1,6 +1,15 @@
 // src/services/BaseService.js
 
-import { collection, getDocs, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import {
+  collection,
+  getDoc,
+  getDocs,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+} from 'firebase/firestore';
 import { db } from './FirebaseConfig';
 
 class BaseService {
@@ -41,6 +50,16 @@ class BaseService {
     const docRef = doc(this.collection, id);
     await deleteDoc(docRef);
     return id;
+  }
+
+  onCollectionUpdate(callback) {
+    return onSnapshot(this.collection, (querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      callback(data);
+    });
   }
 }
 
