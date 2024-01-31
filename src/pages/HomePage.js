@@ -10,6 +10,7 @@ import { useRootStore } from '../stores/RootStore';
 function HomePage() {
   const { vehicleStore } = useRootStore();
   const [sortingOption, setSortingOption] = useState('default');
+  const [filterValue, setFilterValue] = useState('');
 
   useEffect(() => {
     vehicleStore.loadVehicleMakes();
@@ -18,6 +19,15 @@ function HomePage() {
 
   const handleSortChange = (sortOption) => {
     setSortingOption(sortOption);
+  };
+
+  const handleFilterChange = (value) => {
+    setFilterValue(value);
+  };
+
+  const handleResetFilter = () => {
+    setFilterValue('');
+    console.log('Filter reset');
   };
 
   return (
@@ -35,10 +45,13 @@ function HomePage() {
         style={{ maxWidth: '80%' }}
       >
         <AddVehicle />
-        <Filtering />
+        <Filtering
+          onFilterChange={handleFilterChange}
+          onResetFilter={handleResetFilter}
+        />
         <Sorting onSortChange={handleSortChange} />
       </div>
-      <VehicleList sortingOption={sortingOption} />
+      <VehicleList sortingOption={sortingOption} filterValue={filterValue} />
     </div>
   );
 }

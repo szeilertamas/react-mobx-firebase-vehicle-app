@@ -6,7 +6,7 @@ import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
 import Paging from './Paging';
 
-const VehicleList = observer(({ sortingOption }) => {
+const VehicleList = observer(({ sortingOption, filterValue }) => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
@@ -75,6 +75,19 @@ const VehicleList = observer(({ sortingOption }) => {
     return sortedArray;
   };
 
+  const filteredModels = () => {
+    return sortedModels().filter((model) => {
+      const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId)?.name || '';
+      const modelName = model.name.toLowerCase();
+      const modelYear = model.year.toString();
+      const makeName = make.toLowerCase();
+      const filterText = filterValue.toLowerCase();
+  
+      return modelName.includes(filterText) || makeName.includes(filterText) || modelYear.includes(filterText);
+    });
+  };
+  
+
   return (
     <div className="container mt-5 table-container">
       <table className="table table-hover">
@@ -89,7 +102,7 @@ const VehicleList = observer(({ sortingOption }) => {
           </tr>
         </thead>
         <tbody>
-          {vehicleStore.paginate(sortedModels()).map((model, index) => {
+          {vehicleStore.paginate(filteredModels()).map((model, index) => {
             const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
             const uniqueIndex = (vehicleStore.currentPage - 1) * vehicleStore.itemsPerPage + index + 1;
             return (
@@ -121,7 +134,7 @@ const VehicleList = observer(({ sortingOption }) => {
       <div className="m-4">
         <Paging
           currentPage={vehicleStore.currentPage}
-          totalPages={vehicleStore.calculateTotalPages()}
+          totalPages={vehicleStore.calculateTotalPages(filteredModels())}
           goToNextPage={() => handlePageChange(vehicleStore.currentPage + 1)}
           goToPrevPage={() => handlePageChange(vehicleStore.currentPage - 1)}
           goToPage={(page) => handlePageChange(page)}
