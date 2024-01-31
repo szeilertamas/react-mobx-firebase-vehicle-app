@@ -6,7 +6,7 @@ import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
 import Paging from './Paging';
 
-const VehicleList = observer(() => {
+const VehicleList = observer(({ sortingOption }) => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
@@ -33,6 +33,48 @@ const VehicleList = observer(() => {
     console.log('Current page after change', vehicleStore.currentPage);
   };
 
+  const sortedModels = () => {
+    let sortedArray = [...vehicleStore.vehicleModels];
+
+    switch (sortingOption) {
+      case 'lowestPrice':
+        sortedArray.sort((a, b) => a.price - b.price);
+        break;
+      case 'highestPrice':
+        sortedArray.sort((a, b) => b.price - a.price);
+        break;
+      case 'modelsAZ':
+        sortedArray.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'modelsZA':
+        sortedArray.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'makeAZ':
+        sortedArray.sort((a, b) => {
+          const makeA = vehicleStore.vehicleMakes.find((make) => make.id === a.makeId)?.name || '';
+          const makeB = vehicleStore.vehicleMakes.find((make) => make.id === b.makeId)?.name || '';
+          return makeA.localeCompare(makeB);
+        });
+        break;
+      case 'makeZA':
+        sortedArray.sort((a, b) => {
+          const makeA = vehicleStore.vehicleMakes.find((make) => make.id === a.makeId)?.name || '';
+          const makeB = vehicleStore.vehicleMakes.find((make) => make.id === b.makeId)?.name || '';
+          return makeB.localeCompare(makeA);
+        });
+        break;
+      case 'newest':
+        sortedArray.sort((a, b) => b.year - a.year);
+        break;
+      case 'oldest':
+        sortedArray.sort((a, b) => a.year - b.year);
+        break;
+      default:
+    }
+
+    return sortedArray;
+  };
+
   return (
     <div className="container mt-5 table-container">
       <table className="table table-hover">
@@ -47,7 +89,7 @@ const VehicleList = observer(() => {
           </tr>
         </thead>
         <tbody>
-          {vehicleStore.paginate(vehicleStore.vehicleModels).map((model, index) => {
+          {vehicleStore.paginate(sortedModels()).map((model, index) => {
             const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
             const uniqueIndex = (vehicleStore.currentPage - 1) * vehicleStore.itemsPerPage + index + 1;
             return (
