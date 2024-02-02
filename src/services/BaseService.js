@@ -10,7 +10,7 @@ import {
   deleteDoc,
   onSnapshot,
 } from 'firebase/firestore';
-import { db } from './FirebaseConfig';
+import { db } from '../utils/firebaseConfig';
 
 class BaseService {
   constructor(collectionName) {

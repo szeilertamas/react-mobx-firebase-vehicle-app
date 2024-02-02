@@ -1,84 +1,127 @@
 // src/components/VehicleForm.js
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react";
+import form from "../utils/formConfig";
 
-const VehicleForm = ({ onSubmit, onCancel, initialValues }) => {
-  const [formData, setFormData] = React.useState(initialValues);
+const VehicleForm = observer(({ onSubmit, onCancel, initialValues }) => {
+  const { make, model, year, price } = form.values();
+  const { errors } = form;
 
-  useEffect(() => {
-    setFormData(initialValues);
-  }, [initialValues]);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    form.$(name).value = value;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    setFormSubmitted(true);
+
+    form
+      .validate({ showErrors: true })
+      .then(() => {
+        if (form.isValid) {
+          onSubmit(form.values());
+        }
+      })
+      .catch((err) => console.error("Validation Error:", err));
+  };
+
+  useEffect(() => {
+    form.update(initialValues);
+  }, [initialValues]);
+
+  const getFieldError = (fieldName) => {
+    const field = form.$(fieldName);
+
+    if (formSubmitted && !field.value) {
+      return "This field is required.";
+    }
+
+    return errors[fieldName] && errors[fieldName].message;
   };
 
   return (
     <div className="container mt-4">
       <h3>{initialValues.id ? "Edit Vehicle" : "Add Vehicle"}</h3>
       <form onSubmit={handleSubmit}>
+        {formSubmitted && (
+          <div className="alert alert-danger" role="alert">
+            Please fix the errors before submitting the form.
+          </div>
+        )}
+
         <div className="mb-3">
           <label htmlFor="make" className="form-label">
             Make
           </label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${getFieldError('make') ? 'is-invalid' : ''}`}
             id="make"
             name="make"
-            value={formData.make}
+            value={make}
             onChange={handleChange}
-            required
           />
+          {getFieldError('make') && (
+            <div className="invalid-feedback">{getFieldError('make')}</div>
+          )}
         </div>
+
         <div className="mb-3">
           <label htmlFor="model" className="form-label">
             Model
           </label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${getFieldError('model') ? 'is-invalid' : ''}`}
             id="model"
             name="model"
-            value={formData.model}
+            value={model}
             onChange={handleChange}
-            required
           />
+          {getFieldError('model') && (
+            <div className="invalid-feedback">{getFieldError('model')}</div>
+          )}
         </div>
+
         <div className="mb-3">
           <label htmlFor="year" className="form-label">
             Year
           </label>
           <input
-            type="number"
-            className="form-control"
+            type="text"
+            className={`form-control ${getFieldError('year') ? 'is-invalid' : ''}`}
             id="year"
             name="year"
-            value={formData.year}
+            value={year}
             onChange={handleChange}
-            required
           />
+          {getFieldError('year') && (
+            <div className="invalid-feedback">{getFieldError('year')}</div>
+          )}
         </div>
+
         <div className="mb-3">
           <label htmlFor="price" className="form-label">
             Price
           </label>
           <input
-            type="number"
-            className="form-control"
+            type="text"
+            className={`form-control ${getFieldError('price') ? 'is-invalid' : ''}`}
             id="price"
             name="price"
-            value={formData.price}
+            value={price}
             onChange={handleChange}
-            required
           />
+          {getFieldError('price') && (
+            <div className="invalid-feedback">{getFieldError('price')}</div>
+          )}
         </div>
+
         <div className="mb-3 text-center">
           <button type="submit" className="btn btn-primary me-2">
             {initialValues.id ? "Update" : "Add"}
@@ -90,6 +133,6 @@ const VehicleForm = ({ onSubmit, onCancel, initialValues }) => {
       </form>
     </div>
   );
-};
+});
 
 export default VehicleForm;

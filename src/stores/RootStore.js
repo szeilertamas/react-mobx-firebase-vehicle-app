@@ -1,7 +1,7 @@
 // src/stores/RootStore.js
 
 import React, { createContext, useContext } from 'react';
-import { makeObservable, observable, action } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 import VehicleStore from './VehicleStore';
 
 const RootStoreContext = createContext();
