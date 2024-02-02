@@ -20,6 +20,13 @@ const VehicleForm = observer(({ onSubmit, onCancel, initialValues }) => {
 
     setFormSubmitted(true);
 
+    const hasEmptyFields = Object.values(form.values()).some((value) => value === '');
+
+    if (hasEmptyFields) {
+      setFormSubmitted(true);
+      return;
+    }
+
     form
       .validate({ showErrors: true })
       .then(() => {
