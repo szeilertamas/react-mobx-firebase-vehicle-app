@@ -55,6 +55,17 @@ class VehicleStore {
     }
   }
 
+  async updateMake(makeId, updatedMake) {
+    try {
+      await vehicleMakeService.update(makeId, {
+        name: updatedMake,
+      });
+    } catch (error) {
+      console.error('Error updating make:', error);
+      throw error;
+    }
+  }
+
   async updateVehicle(id, updatedVehicle) {
     try {
       const existingVehicle = await vehicleModelService.getById(id);
@@ -79,8 +90,10 @@ class VehicleStore {
           console.error(`Make with ID ${updatedVehicle.makeId} not found.`);
         }
       }
+      await this.updateMake(existingVehicle.makeId, updatedVehicle.make);
     } catch (error) {
       console.error('Error updating vehicle:', error);
+      throw error;
     }
   }
 
