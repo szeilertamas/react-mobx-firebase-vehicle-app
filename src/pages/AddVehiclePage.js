@@ -4,6 +4,7 @@ import React from "react";
 import VehicleForm from "../components/VehicleForm";
 import { useRootStore } from "../stores/RootStore";
 import { useNavigate } from "react-router-dom";
+import Navbar from '../components/Navbar';
 
 const AddVehiclePage = () => {
   const { vehicleStore } = useRootStore();
@@ -27,6 +28,7 @@ const AddVehiclePage = () => {
 
   return (
     <div>
+      <Navbar />
       <VehicleForm
         onSubmit={handleAddVehicle}
         onCancel={handleCancel}

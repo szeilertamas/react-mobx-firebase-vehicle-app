@@ -7,6 +7,7 @@ import Filtering from "../components/Filtering";
 import Sorting from "../components/Sorting";
 import { useRootStore } from "../stores/RootStore";
 import Loading from "../components/Loading";
+import Navbar from '../components/Navbar';
 
 function HomePage() {
   const { vehicleStore } = useRootStore();
@@ -44,16 +45,7 @@ function HomePage() {
 
   return (
     <div>
-      <nav className="navbar navbar-light bg-primary">
-        <div className="container-fluid">
-          <span
-            className="navbar-brand mb-0 ms-2 h2 text-light"
-            style={{ fontSize: "1.5rem" }}
-          >
-            AutoConnect
-          </span>
-        </div>
-      </nav>
+      <Navbar />
       <div
         className="container d-flex justify-content-between
         align-items-center px-3 mt-3"

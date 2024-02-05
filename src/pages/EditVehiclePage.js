@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import VehicleForm from "../components/VehicleForm";
 import Loading from "../components/Loading";
 import { useRootStore } from "../stores/RootStore";
+import Navbar from '../components/Navbar';
 
 const EditVehiclePage = () => {
   const { id } = useParams();
@@ -41,22 +42,13 @@ const EditVehiclePage = () => {
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
+        setLoading(false);
         navigate("/");
       }
     };
 
     fetchData();
   }, [vehicleStore, navigate, id]);
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!initialValues) {
-    console.error(`Initial values not available.`);
-    navigate("/");
-    return null;
-  }
 
   const handleUpdateVehicle = async (formData) => {
     await vehicleStore.loadVehicleMakes();
@@ -78,13 +70,18 @@ const EditVehiclePage = () => {
 
   return (
     <div>
-      <VehicleForm
-        onSubmit={handleUpdateVehicle}
-        onCancel={handleCancel}
-        initialValues={initialValues}
-        makes={vehicleStore.vehicleMakes}
-        models={vehicleStore.vehicleModels}
-      />
+      <Navbar />
+      {loading ? (
+        <Loading />
+      ) : (
+        <VehicleForm
+          onSubmit={handleUpdateVehicle}
+          onCancel={handleCancel}
+          initialValues={initialValues}
+          makes={vehicleStore.vehicleMakes}
+          models={vehicleStore.vehicleModels}
+        />
+      )}
     </div>
   );
 };
