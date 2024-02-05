@@ -1,20 +1,32 @@
 // src/pages/HomePage.js
 
-import React, { useEffect, useState } from 'react';
-import VehicleList from '../components/VehicleList';
-import AddVehicle from '../components/AddVehicle';
-import Filtering from '../components/Filtering';
-import Sorting from '../components/Sorting';
-import { useRootStore } from '../stores/RootStore';
+import React, { useEffect, useState } from "react";
+import VehicleList from "../components/VehicleList";
+import AddVehicle from "../components/AddVehicle";
+import Filtering from "../components/Filtering";
+import Sorting from "../components/Sorting";
+import { useRootStore } from "../stores/RootStore";
+import Loading from "../components/Loading";
 
 function HomePage() {
   const { vehicleStore } = useRootStore();
-  const [sortingOption, setSortingOption] = useState('default');
-  const [filterValue, setFilterValue] = useState('');
+  const [sortingOption, setSortingOption] = useState("default");
+  const [filterValue, setFilterValue] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    vehicleStore.loadVehicleMakes();
-    vehicleStore.loadVehicleModels();
+    const fetchData = async () => {
+      try {
+        await vehicleStore.loadVehicleMakes();
+        await vehicleStore.loadVehicleModels();
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, [vehicleStore]);
 
   const handleSortChange = (sortOption) => {
@@ -26,15 +38,18 @@ function HomePage() {
   };
 
   const handleResetFilter = () => {
-    setFilterValue('');
-    console.log('Filter reset');
+    setFilterValue("");
+    console.log("Filter reset");
   };
 
   return (
     <div>
       <nav className="navbar navbar-light bg-primary">
         <div className="container-fluid">
-          <span className="navbar-brand mb-0 ms-2 h2 text-light" style={{ fontSize: '1.5rem' }}>
+          <span
+            className="navbar-brand mb-0 ms-2 h2 text-light"
+            style={{ fontSize: "1.5rem" }}
+          >
             AutoConnect
           </span>
         </div>
@@ -42,7 +57,7 @@ function HomePage() {
       <div
         className="container d-flex justify-content-between
         align-items-center px-3 mt-3"
-        style={{ maxWidth: '80%' }}
+        style={{ maxWidth: "80%" }}
       >
         <AddVehicle />
         <Filtering
@@ -51,7 +66,15 @@ function HomePage() {
         />
         <Sorting onSortChange={handleSortChange} />
       </div>
-      <VehicleList sortingOption={sortingOption} filterValue={filterValue} />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <VehicleList
+          sortingOption={sortingOption}
+          filterValue={filterValue}
+          setIsLoading={setIsLoading}
+        />
+      )}
     </div>
   );
 }

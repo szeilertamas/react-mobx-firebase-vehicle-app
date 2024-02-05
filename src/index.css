@@ -31,3 +31,11 @@ h1, h2, h3 {
 .table-container td {
   text-align: center;
 }
+
+/* Styling for Loading */
+.loading-container {
+  height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

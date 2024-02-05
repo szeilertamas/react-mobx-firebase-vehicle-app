@@ -6,7 +6,7 @@ import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
 import Paging from './Paging';
 
-const VehicleList = observer(({ sortingOption, filterValue }) => {
+const VehicleList = observer(({ sortingOption, filterValue, setIsLoading }) => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
@@ -17,11 +17,13 @@ const VehicleList = observer(({ sortingOption, filterValue }) => {
         await vehicleStore.loadVehicleModels();
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [vehicleStore]);
+  }, [vehicleStore, setIsLoading]);
 
   const handleEditClick = (id) => {
     navigate(`/edit/${id}`);
@@ -86,19 +88,18 @@ const VehicleList = observer(({ sortingOption, filterValue }) => {
       return modelName.includes(filterText) || makeName.includes(filterText) || modelYear.includes(filterText);
     });
   };
-  
 
   return (
     <div className="container mt-5 table-container">
-      <table className="table table-hover">
+      <table className="table table-hover table-layout-fixed table-responsive">
         <thead className="thead-light">
           <tr>
-            <th>#</th>
-            <th>Make</th>
-            <th>Model</th>
-            <th>Year</th>
-            <th>Price</th>
-            <th>Actions</th>
+            <th style={{ width: '5%' }}>#</th>
+            <th style={{ width: '15%' }}>Make</th>
+            <th style={{ width: '15%' }}>Model</th>
+            <th style={{ width: '10%' }}>Year</th>
+            <th style={{ width: '15%' }}>Price</th>
+            <th style={{ width: '20%' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -131,15 +132,17 @@ const VehicleList = observer(({ sortingOption, filterValue }) => {
           })}
         </tbody>
       </table>
-      <div className="m-4">
-        <Paging
-          currentPage={vehicleStore.currentPage}
-          totalPages={vehicleStore.calculateTotalPages(filteredModels())}
-          goToNextPage={() => handlePageChange(vehicleStore.currentPage + 1)}
-          goToPrevPage={() => handlePageChange(vehicleStore.currentPage - 1)}
-          goToPage={(page) => handlePageChange(page)}
-        />
-      </div>
+      {vehicleStore.vehicleModels.length > 0 && (
+        <div className="m-4">
+          <Paging
+            currentPage={vehicleStore.currentPage}
+            totalPages={vehicleStore.calculateTotalPages(filteredModels())}
+            goToNextPage={() => handlePageChange(vehicleStore.currentPage + 1)}
+            goToPrevPage={() => handlePageChange(vehicleStore.currentPage - 1)}
+            goToPage={(page) => handlePageChange(page)}
+          />
+        </div>
+      )}
     </div>
   );
 });

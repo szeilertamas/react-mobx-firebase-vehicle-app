@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import VehicleForm from "../components/VehicleForm";
+import Loading from "../components/Loading";
 import { useRootStore } from "../stores/RootStore";
 
 const EditVehiclePage = () => {
@@ -48,7 +49,7 @@ const EditVehiclePage = () => {
   }, [vehicleStore, navigate, id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (!initialValues) {
