@@ -5,51 +5,52 @@ import { observer } from "mobx-react";
 import form from "../utils/formConfig";
 
 const VehicleForm = observer(({ onSubmit, onCancel, initialValues }) => {
-  const { make, model, year, price } = form.values();
-  const { errors } = form;
-
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    form.update(initialValues);
+  }, [initialValues]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     form.$(name).value = value;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setFormSubmitted(true);
 
-    const hasEmptyFields = Object.values(form.values()).some((value) => value === '');
+    try {
+      await form.validate({ showErrors: true });
 
-    if (hasEmptyFields) {
-      setFormSubmitted(true);
-      return;
+      if (form.isValid) {
+        onSubmit(form.values());
+      } else {
+        setErrors(form.errors());
+      }
+    } catch (err) {
+      console.error("Validation Error:", err);
     }
-
-    form
-      .validate({ showErrors: true })
-      .then(() => {
-        if (form.isValid) {
-          onSubmit(form.values());
-        }
-      })
-      .catch((err) => console.error("Validation Error:", err));
   };
-
-  useEffect(() => {
-    form.update(initialValues);
-  }, [initialValues]);
 
   const getFieldError = (fieldName) => {
     const field = form.$(fieldName);
-
+  
     if (formSubmitted && !field.value) {
       return "This field is required.";
     }
 
-    return errors[fieldName] && errors[fieldName].message;
+    if (errors[fieldName]) {
+      return errors[fieldName];
+    }
+  
+    return '';
   };
+  
+
+  const { make, model, year, price } = form.values();
 
   return (
     <div className="container mt-4">
