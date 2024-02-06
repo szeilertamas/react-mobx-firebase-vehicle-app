@@ -10,15 +10,18 @@ const AddVehiclePage = () => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
+  // Function to handle adding a new vehicle
   const handleAddVehicle = (formData) => {
-    vehicleStore.addVehicle(formData);
+    vehicleStore.addVehicle(formData); // Adding vehicle using vehicleStore
     navigate("/");
   };
 
+  // Function to handle canceling adding a new vehicle
   const handleCancel = () => {
     navigate("/");
   };
 
+  // Initial values for the form fields
   const initialValues = {
     make: "",
     model: "",
@@ -29,10 +32,11 @@ const AddVehiclePage = () => {
   return (
     <div>
       <Navbar />
+      {/* Displaying VehicleForm component with necessary props */}
       <VehicleForm
-        onSubmit={handleAddVehicle}
-        onCancel={handleCancel}
-        initialValues={initialValues}
+        onSubmit={handleAddVehicle} // Passing onSubmit function to handle form submission
+        onCancel={handleCancel} // Passing onCancel function to handle form cancellation
+        initialValues={initialValues} // Passing initial form values
       />
     </div>
   );

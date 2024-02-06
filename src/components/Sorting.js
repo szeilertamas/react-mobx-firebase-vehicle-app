@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 
 function Sorting({ onSortChange }) {
+  // State to track if an option is selected
   const [hasSelectedOption, setHasSelectedOption] = useState(false);
 
+  // Handler for sorting change
   const handleSortChange = (e) => {
     const newSort = e.target.value;
     if (newSort === 'default') {
@@ -12,6 +14,7 @@ function Sorting({ onSortChange }) {
     } else {
       setHasSelectedOption(true);
     }
+    // Invoke the callback function with the new sort value
     onSortChange(newSort);
   };
 

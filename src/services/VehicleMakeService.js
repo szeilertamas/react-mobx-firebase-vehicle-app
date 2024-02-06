@@ -4,10 +4,10 @@ import BaseService from './BaseService';
 
 class VehicleMakeService extends BaseService {
   constructor() {
-    super('vehicleMakes');
+    super('vehicleMakes'); // Calling super constructor with the collection name 'vehicleMakes'
   }
 }
 
 const vehicleMakeService = new VehicleMakeService();
 
-export { vehicleMakeService };
+export { vehicleMakeService }; // Exporting the instance of VehicleMakeService

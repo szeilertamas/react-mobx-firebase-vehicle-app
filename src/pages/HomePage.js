@@ -30,17 +30,19 @@ function HomePage() {
     fetchData();
   }, [vehicleStore]);
 
+  // Function to handle sort change
   const handleSortChange = (sortOption) => {
     setSortingOption(sortOption);
   };
 
+  // Function to handle filter change
   const handleFilterChange = (value) => {
     setFilterValue(value);
   };
 
+  // Function to handle resetting filter
   const handleResetFilter = () => {
     setFilterValue("");
-    console.log("Filter reset");
   };
 
   return (
@@ -58,6 +60,7 @@ function HomePage() {
         />
         <Sorting onSortChange={handleSortChange} />
       </div>
+      {/* Conditional rendering: if loading, display Loading component, otherwise display VehicleList */}
       {isLoading ? (
         <Loading />
       ) : (

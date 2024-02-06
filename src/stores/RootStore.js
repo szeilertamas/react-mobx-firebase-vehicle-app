@@ -4,6 +4,7 @@ import React, { createContext, useContext } from 'react';
 import { makeObservable, observable } from 'mobx';
 import VehicleStore from './VehicleStore';
 
+// Creating a context for the root store
 const RootStoreContext = createContext();
 
 class RootStore {
@@ -11,6 +12,7 @@ class RootStore {
 
   constructor() {
     this.vehicleStore = new VehicleStore();
+    // Making vehicleStore observable using makeObservable from mobx
     makeObservable(this, {
       vehicleStore: observable,
     });
@@ -19,6 +21,7 @@ class RootStore {
 
 const rootStore = new RootStore();
 
+// RootStoreProvider component to provide the root store context to its children
 const RootStoreProvider = ({ children }) => {
   return (
     <RootStoreContext.Provider value={rootStore}>
@@ -27,6 +30,7 @@ const RootStoreProvider = ({ children }) => {
   );
 };
 
+// Custom hook to access the root store
 const useRootStore = () => {
   const context = useContext(RootStoreContext);
   if (!context) {
