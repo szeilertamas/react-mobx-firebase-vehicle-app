@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/react-mobx-firebase-vehicle-app/static/css/main.d24bdfdb.css",
+    "main.js": "/react-mobx-firebase-vehicle-app/static/js/main.d02ebac5.js",
+    "index.html": "/react-mobx-firebase-vehicle-app/index.html",
+    "main.d24bdfdb.css.map": "/react-mobx-firebase-vehicle-app/static/css/main.d24bdfdb.css.map",
+    "main.d02ebac5.js.map": "/react-mobx-firebase-vehicle-app/static/js/main.d02ebac5.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d24bdfdb.css",
+    "static/js/main.d02ebac5.js"
+  ]
+}
