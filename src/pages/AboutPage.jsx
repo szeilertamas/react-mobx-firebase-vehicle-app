@@ -1,4 +1,4 @@
-// src/pages/AboutPage.js
+// src/pages/AboutPage.jsx
 
 import React from "react";
 import Navbar from "../components/Navbar";

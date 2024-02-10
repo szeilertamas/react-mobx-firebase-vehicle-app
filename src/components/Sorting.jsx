@@ -1,4 +1,4 @@
-// src/components/Sorting.js
+// src/components/Sorting.jsx
 
 import React, { useState } from 'react';
 

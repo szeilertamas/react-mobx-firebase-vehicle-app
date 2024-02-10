@@ -1,4 +1,4 @@
-// src/pages/EditVehiclePage.js
+// src/pages/EditVehiclePage.jsx
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";

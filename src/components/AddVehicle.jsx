@@ -1,4 +1,4 @@
-// src/components/AddVehicle.js
+// src/components/AddVehicle.jsx
 
 import React from 'react';
 import { Link } from 'react-router-dom';

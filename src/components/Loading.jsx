@@ -1,4 +1,4 @@
-// src/components/Loading.js
+// src/components/Loading.jsx
 
 import React from 'react';
 

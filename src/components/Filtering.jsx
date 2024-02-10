@@ -1,4 +1,4 @@
-// src/components/Filtering.js
+// src/components/Filtering.jsx
 
 import React, { useState } from 'react';
 

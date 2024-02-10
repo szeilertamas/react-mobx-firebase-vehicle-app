@@ -1,4 +1,4 @@
-// src/components/Paging.js
+// src/components/Paging.jsx
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';

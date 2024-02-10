@@ -1,4 +1,4 @@
-// src/components/VehicleList.js
+// src/components/VehicleList.jsx
 
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';

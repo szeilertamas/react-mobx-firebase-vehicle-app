@@ -1,4 +1,4 @@
-// src/pages/HomePage.js
+// src/pages/HomePage.jsx
 
 import React, { useEffect, useState } from "react";
 import VehicleList from "../components/VehicleList";

@@ -1,4 +1,4 @@
-// src/components/VehicleForm.js
+// src/components/VehicleForm.jsx
 
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
