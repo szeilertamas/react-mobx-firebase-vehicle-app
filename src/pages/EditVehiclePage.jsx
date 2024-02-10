@@ -8,12 +8,12 @@ import { useRootStore } from "../stores/RootStore";
 import Navbar from '../components/Navbar';
 
 const EditVehiclePage = () => {
-  const { id } = useParams(); // Getting id parameter from URL
-  const navigate = useNavigate(); // Initializing navigate function using useNavigate hook
-  const { vehicleStore } = useRootStore(); // Accessing vehicleStore from RootStore
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { vehicleStore, formStore } = useRootStore();
 
   const [loading, setLoading] = useState(true);
-  const [initialValues, setInitialValues] = useState(null); // State to manage initial form values
+  const [initialValues, setInitialValues] = useState(null);
 
   // Fetch initial data
   useEffect(() => {
@@ -22,16 +22,16 @@ const EditVehiclePage = () => {
         await vehicleStore.loadVehicleModels();
         await vehicleStore.loadVehicleMakes();
 
-        const initialData = vehicleStore.getVehicleById(id); // Getting initial data for the vehicle by ID
+        const initialData = vehicleStore.getVehicleById(id);
 
         if (!initialData) {
-          console.error(`Vehicle with ID ${id} not found.`); // Logging error if vehicle not found
+          console.error(`Vehicle with ID ${id} not found.`);
           navigate("/");
           return;
         }
 
-        const initialMakeId = initialData.makeId; // Getting initial make ID
-        const initialMakeDocument = await vehicleStore.getMakeById(initialMakeId); // Getting make document by ID
+        const initialMakeId = initialData.makeId;
+        const initialMakeDocument = await vehicleStore.getMakeById(initialMakeId);
 
         // Setting initial form values with retrieved data
         setInitialValues({
@@ -52,17 +52,22 @@ const EditVehiclePage = () => {
     fetchData();
   }, [vehicleStore, navigate, id]);
 
+    // Reset form state when initialValues change
+    useEffect(() => {
+      formStore.clearFormData();
+    }, [initialValues, formStore]);
+
   // Function to handle updating vehicle
   const handleUpdateVehicle = async (formData) => {
     await vehicleStore.loadVehicleMakes();
 
-    const selectedMake = vehicleStore.vehicleMakes.find((make) => make.name === formData.make); // Finding selected make from store
+    const selectedMake = vehicleStore.vehicleMakes.find((make) => make.name === formData.make);
 
     if (selectedMake) {
-      formData.makeId = selectedMake.id; // Setting make ID in form data
+      formData.makeId = selectedMake.id;
     }
 
-    vehicleStore.updateVehicle(id, formData); // Updating vehicle using vehicleStore
+    vehicleStore.updateVehicle(id, formData);
 
     navigate("/");
   };
@@ -80,12 +85,18 @@ const EditVehiclePage = () => {
         <Loading />
       ) : (
         <VehicleForm
-          onSubmit={handleUpdateVehicle} // Passing onSubmit function to handle form submission
-          onCancel={handleCancel} // Passing onCancel function to handle form cancellation
-          initialValues={initialValues} // Passing initial form values
-          makes={vehicleStore.vehicleMakes} // Passing vehicle makes to form component
-          models={vehicleStore.vehicleModels} // Passing vehicle models to form component
+          onSubmit={handleUpdateVehicle}
+          onCancel={handleCancel}
+          initialValues={initialValues}
+          makes={vehicleStore.vehicleMakes}
+          models={vehicleStore.vehicleModels}
         />
+      )}
+      {/* Display error message if form has been submitted and there are errors */}
+      {formStore.formSubmitted && Object.keys(formStore.errors).length > 0 && (
+        <div className="alert alert-danger mt-3" role="alert">
+          Please fix the errors before submitting the form.
+        </div>
       )}
     </div>
   );

@@ -36,18 +36,13 @@ const VehicleForm = observer(({ onSubmit, onCancel, initialValues }) => {
   };
 
   const getFieldError = (fieldName) => {
-    const field = form.$(fieldName);
-
-    if (formStore.formSubmitted && !field.value) {
-      return "This field is required.";
-    }
-
-    if (formStore.errors[fieldName]) {
+    if (formStore.formSubmitted && formStore.errors[fieldName]) {
       return formStore.errors[fieldName];
     }
-
+  
     return '';
   };
+  
 
   const { make, model, year, price } = form.values();
 
