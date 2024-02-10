@@ -99,6 +99,15 @@ class VehicleStore {
     }
   }
 
+    // Method to update the name of a make in the database
+  async updateMake(makeId, newName) {
+    try {
+      await vehicleMakeService.update(makeId, { name: newName });
+    } catch (error) {
+      console.error('Error updating make:', error);
+    }
+  }
+
   // Method to delete a vehicle from the database
   async deleteVehicle(id) {
     try {

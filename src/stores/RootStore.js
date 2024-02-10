@@ -3,25 +3,26 @@
 import React, { createContext, useContext } from 'react';
 import { makeObservable, observable } from 'mobx';
 import VehicleStore from './VehicleStore';
+import FormStore from './FormStore'; // Import FormStore
 
-// Creating a context for the root store
 const RootStoreContext = createContext();
 
 class RootStore {
   vehicleStore;
+  formStore; // Add formStore property
 
   constructor() {
     this.vehicleStore = new VehicleStore();
-    // Making vehicleStore observable using makeObservable from mobx
+    this.formStore = new FormStore(); // Initialize FormStore
     makeObservable(this, {
       vehicleStore: observable,
+      formStore: observable, // Make formStore observable
     });
   }
 }
 
 const rootStore = new RootStore();
 
-// RootStoreProvider component to provide the root store context to its children
 const RootStoreProvider = ({ children }) => {
   return (
     <RootStoreContext.Provider value={rootStore}>
@@ -30,7 +31,6 @@ const RootStoreProvider = ({ children }) => {
   );
 };
 
-// Custom hook to access the root store
 const useRootStore = () => {
   const context = useContext(RootStoreContext);
   if (!context) {
