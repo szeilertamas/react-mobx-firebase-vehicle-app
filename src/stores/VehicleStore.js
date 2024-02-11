@@ -9,29 +9,36 @@ class VehicleStore {
   vehicleModels = [];
   currentPage = 1;
   itemsPerPage = 9;
+  totalItems = 0;
 
-  // Method to asynchronously load vehicle makes from the database
-  async loadVehicleMakes() {
+  // Method to asynchronously load vehicle makes from the database with paging, filtering, and sorting
+  async loadVehicleMakes(filters = {}, sortBy = null, sortOrder = 'asc') {
     try {
-      // Listening for updates to vehicle makes collection and updating the observable array
-      vehicleMakeService.onCollectionUpdate((data) => {
-        runInAction(() => {
-          this.vehicleMakes = data; // Updating vehicleMakes array
-        });
+      // Fetching vehicle makes with paging, filtering, and sorting
+      const startIdx = (this.currentPage - 1) * this.itemsPerPage;
+      const endIdx = startIdx + this.itemsPerPage;
+      const vehicleMakes = await vehicleMakeService.getAllPaged(startIdx, endIdx, filters, sortBy, sortOrder);
+      
+      runInAction(() => {
+        this.vehicleMakes = vehicleMakes.data; // Updating vehicleMakes array
+        this.totalItems = vehicleMakes.total; // Updating totalItems count
       });
     } catch (error) {
       console.error('Error loading vehicle makes:', error);
     }
   }
 
-  // Method to asynchronously load vehicle models from the database
-  async loadVehicleModels() {
+  // Method to asynchronously load vehicle models from the database with paging, filtering, and sorting
+  async loadVehicleModels(filters = {}, sortBy = null, sortOrder = 'asc') {
     try {
-      // Listening for updates to vehicle models collection and updating the observable array
-      vehicleModelService.onCollectionUpdate((data) => {
-        runInAction(() => {
-          this.vehicleModels = data; // Updating vehicleModels array
-        });
+      // Fetching vehicle models with paging, filtering, and sorting
+      const startIdx = (this.currentPage - 1) * this.itemsPerPage;
+      const endIdx = startIdx + this.itemsPerPage;
+      const vehicleModels = await vehicleModelService.getAllPaged(startIdx, endIdx, filters, sortBy, sortOrder);
+      
+      runInAction(() => {
+        this.vehicleModels = vehicleModels.data; // Updating vehicleModels array
+        this.totalItems = vehicleModels.total; // Updating totalItems count
       });
     } catch (error) {
       console.error('Error loading vehicle models:', error);
@@ -178,6 +185,7 @@ class VehicleStore {
       vehicleModels: observable,
       currentPage: observable,
       itemsPerPage: observable,
+      totalItems: observable,
       loadVehicleMakes: action,
       loadVehicleModels: action,
       addVehicle: action,

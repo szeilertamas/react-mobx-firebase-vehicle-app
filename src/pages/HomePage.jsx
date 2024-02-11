@@ -68,6 +68,7 @@ function HomePage() {
           sortingOption={sortingOption}
           filterValue={filterValue}
           setIsLoading={setIsLoading}
+          vehicleStore={vehicleStore}
         />
       )}
     </div>

@@ -9,57 +9,79 @@ import {
   updateDoc,
   deleteDoc,
   onSnapshot,
+  query,
+  where,
+  orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db } from '../utils/firebaseConfig';
 
 class BaseService {
   constructor(collectionName) {
-    // Constructor to initialize BaseService with a collection name
-    this.collection = collection(db, collectionName); // Setting Firestore collection reference
+    this.collection = collection(db, collectionName);
   }
 
-  // Method to retrieve all documents from the collection
-  async getAll() {
-    const querySnapshot = await getDocs(this.collection); // Retrieving all documents
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })); // Mapping document data with IDs
+  async getAllPaged(startIdx, endIdx, filters = {}, sortBy = null, sortOrder = 'asc') {
+    try {
+      let queryRef = this.collection;
+
+      // Apply filters
+      for (const key in filters) {
+        queryRef = query(queryRef, where(key, '==', filters[key]));
+      }
+
+      // Apply sorting
+      if (sortBy) {
+        queryRef = queryRef = query(queryRef, orderBy(sortBy, sortOrder));
+      }
+
+      // Apply paging
+      queryRef = query(queryRef, limit(endIdx - startIdx));
+
+      const querySnapshot = await getDocs(queryRef);
+      const total = querySnapshot.size;
+
+      const data = querySnapshot.docs
+        .slice(startIdx, endIdx)
+        .map((doc) => ({ id: doc.id, ...doc.data() }));
+
+      return { data, total };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw error;
+    }
   }
 
-  // Method to retrieve a document by its ID
   async getById(id) {
-    const docRef = doc(this.collection, id); // Creating reference to document by ID
-    const docSnap = await getDoc(docRef); // Retrieving document snapshot
+    const docRef = doc(this.collection, id);
+    const docSnap = await getDoc(docRef);
 
-    // Checking if document exists and returning data
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
   }
 
-  // Method to add a new document to the collection
   async add(data) {
-    const docRef = await addDoc(this.collection, data); // Adding new document to collection
-    return { id: docRef.id, ...data }; // Returning added document data with ID
+    const docRef = await addDoc(this.collection, data);
+    return { id: docRef.id, ...data };
   }
 
-  // Method to update a document by its ID
   async update(id, data) {
-    const docRef = doc(this.collection, id); // Creating reference to document by ID
+    const docRef = doc(this.collection, id);
 
     try {
-      await updateDoc(docRef, data); // Updating document with new data
-      return { id, ...data }; // Returning updated document data with ID
+      await updateDoc(docRef, data);
+      return { id, ...data };
     } catch (error) {
       console.error('Error updating document:', error);
       throw error;
     }
   }
 
-  // Method to delete a document by its ID
   async delete(id) {
-    const docRef = doc(this.collection, id); // Creating reference to document by ID
-    await deleteDoc(docRef); // Deleting document from collection
-    return id; // Returning ID of deleted document
+    const docRef = doc(this.collection, id);
+    await deleteDoc(docRef);
+    return id;
   }
 
-  // Method to listen for changes in the collection and trigger a callback function
   onCollectionUpdate(callback) {
     return onSnapshot(this.collection, (querySnapshot) => {
       const data = [];
