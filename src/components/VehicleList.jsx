@@ -13,9 +13,10 @@ const VehicleList = observer(() => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        await vehicleStore.loadVehicleMakes();
         await vehicleStore.loadVehicleModels();
       } catch (error) {
-        console.error('Error loading vehicle models:', error);
+        console.error('Error loading data:', error);
       }
     };
     fetchData();
