@@ -49,7 +49,7 @@ const VehicleList = observer(() => {
           </tr>
         </thead>
         <tbody>
-          {vehicleStore.vehicleModels.map((model, index) => {
+          {vehicleStore.paginate(vehicleStore.vehicleModels).map((model, index) => {
             const make = vehicleStore.vehicleMakes.find((make) => make.id === model.makeId);
             const uniqueIndex =
               (vehicleStore.currentPage - 1) * vehicleStore.itemsPerPage + index + 1;
@@ -79,14 +79,14 @@ const VehicleList = observer(() => {
           })}
         </tbody>
       </table>
-      {vehicleStore.totalPages > 0 && (
+      {vehicleStore.totalItems > 0 && (
         <div className="m-4">
           <Paging
             currentPage={vehicleStore.currentPage}
-            totalPages={vehicleStore.totalPages}
+            totalPages={vehicleStore.calculateTotalPages()}
             goToNextPage={() => handlePageChange(vehicleStore.currentPage + 1)}
             goToPrevPage={() => handlePageChange(vehicleStore.currentPage - 1)}
-            goToPage={(page) => handlePageChange(page)}
+            goToPage={handlePageChange}
           />
         </div>
       )}

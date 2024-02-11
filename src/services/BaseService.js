@@ -32,7 +32,7 @@ class BaseService {
 
       // Apply sorting
       if (sortBy) {
-        queryRef = queryRef = query(queryRef, orderBy(sortBy, sortOrder));
+        queryRef = query(queryRef, orderBy(sortBy, sortOrder));
       }
 
       // Apply paging
@@ -41,9 +41,7 @@ class BaseService {
       const querySnapshot = await getDocs(queryRef);
       const total = querySnapshot.size;
 
-      const data = querySnapshot.docs
-        .slice(startIdx, endIdx)
-        .map((doc) => ({ id: doc.id, ...doc.data() }));
+      const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
       return { data, total };
     } catch (error) {

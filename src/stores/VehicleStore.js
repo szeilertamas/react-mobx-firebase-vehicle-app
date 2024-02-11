@@ -27,18 +27,17 @@ class VehicleStore {
     try {
       const startIdx = (page - 1) * this.itemsPerPage;
       const endIdx = startIdx + this.itemsPerPage;
-      const vehicleModels = await vehicleModelService.getAllPaged(startIdx, endIdx, filters, sortBy, sortOrder);
+      const { data, total } = await vehicleModelService.getAllPaged(0, Infinity, filters, sortBy, sortOrder);
       
       runInAction(() => {
-        this.vehicleModels = vehicleModels.data; // Update vehicleModels array
+        this.vehicleModels = data; // Update vehicleModels array
         this.currentPage = page; // Update currentPage
-        this.totalItems = vehicleModels.total; // Update totalItems count
+        this.totalItems = total; // Update totalItems count
       });
     } catch (error) {
       console.error('Error loading vehicle models:', error);
     }
-  }
-  
+  }   
 
   // Method to add a new vehicle to the database
   async addVehicle(vehicle) {
@@ -164,7 +163,7 @@ class VehicleStore {
 
   // Method to calculate the total number of pages for paging
   calculateTotalPages() {
-    return Math.ceil(this.vehicleModels.length / this.itemsPerPage);
+    return Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
   // Method to paginate the items based on the current page
