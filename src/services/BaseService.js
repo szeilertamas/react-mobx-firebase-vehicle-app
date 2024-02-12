@@ -24,32 +24,32 @@ class BaseService {
   async getAllPaged(startIdx, endIdx, filters = {}, sortBy = null, sortOrder = 'asc') {
     try {
       let queryRef = this.collection;
-
+  
       // Apply filters
       for (const key in filters) {
         queryRef = query(queryRef, where(key, '==', filters[key]));
       }
-
+  
       // Apply sorting
       if (sortBy) {
         queryRef = query(queryRef, orderBy(sortBy, sortOrder));
       }
-
+  
       // Apply paging
       queryRef = query(queryRef, limit(endIdx - startIdx));
-
+  
       const querySnapshot = await getDocs(queryRef);
       const total = querySnapshot.size;
-
+  
       const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
+  
       return { data, total };
     } catch (error) {
       console.error('Error fetching data:', error);
       throw error;
     }
   }
-
+  
   async getById(id) {
     const docRef = doc(this.collection, id);
     const docSnap = await getDoc(docRef);

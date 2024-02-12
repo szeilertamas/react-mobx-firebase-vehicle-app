@@ -11,15 +11,15 @@ import Navbar from '../components/Navbar';
 
 function HomePage() {
   const { vehicleStore } = useRootStore();
-  const [sortingOption, setSortingOption] = useState("default");
-  const [filterValue, setFilterValue] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         await vehicleStore.loadVehicleMakes();
-        await vehicleStore.loadVehicleModels();
+        await vehicleStore.loadVehicleModels({}, sortBy, sortOrder); // Pass sorting option
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -28,21 +28,17 @@ function HomePage() {
     };
 
     fetchData();
-  }, [vehicleStore]);
+  }, [vehicleStore, sortBy, sortOrder]); // Update dependency
 
-  // Function to handle sort change
-  const handleSortChange = (sortOption) => {
-    setSortingOption(sortOption);
-  };
-
-  // Function to handle filter change
-  const handleFilterChange = (value) => {
-    setFilterValue(value);
-  };
-
-  // Function to handle resetting filter
-  const handleResetFilter = () => {
-    setFilterValue("");
+  const handleSortChange = async (newSort) => {
+    if (newSort === sortBy) {
+      // Toggle sorting order if the same field is clicked again
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Default to ascending order if a new sorting field is selected
+      setSortOrder('asc');
+      setSortBy(newSort);
+    }
   };
 
   return (
@@ -54,22 +50,14 @@ function HomePage() {
         style={{ maxWidth: "80%" }}
       >
         <AddVehicle />
-        <Filtering
-          onFilterChange={handleFilterChange}
-          onResetFilter={handleResetFilter}
-        />
+        <Filtering />
         <Sorting onSortChange={handleSortChange} />
       </div>
       {/* Conditional rendering: if loading, display Loading component, otherwise display VehicleList */}
       {isLoading ? (
         <Loading />
       ) : (
-        <VehicleList
-          sortingOption={sortingOption}
-          filterValue={filterValue}
-          setIsLoading={setIsLoading}
-          vehicleStore={vehicleStore}
-        />
+        <VehicleList />
       )}
     </div>
   );

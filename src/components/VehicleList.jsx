@@ -1,6 +1,6 @@
 // src/components/VehicleList.jsx
 
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'; // Removed useState import since setSortBy is not used
 import { observer } from 'mobx-react-lite';
 import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
@@ -25,14 +25,14 @@ const VehicleList = observer(() => {
       // Cleanup function to reset currentPage when unmounting the component
       vehicleStore.setCurrentPage(1);
     };
-  }, [vehicleStore]);
+  }, [vehicleStore]); // Update effect dependency
 
   const handleEditClick = (id) => {
     navigate(`/edit/${id}`);
   };
 
   const handlePageChange = async (page) => {
-    await vehicleStore.loadVehicleModels({}, null, null, page);
+    await vehicleStore.loadVehicleModels({}, null, page); // Removed sortBy parameter
   };
 
   return (
