@@ -1,8 +1,15 @@
 // src/stores/VehicleStore.js
 
-import { makeObservable, observable, action, reaction, runInAction } from 'mobx';
-import { vehicleMakeService } from '../services/VehicleMakeService';
-import { vehicleModelService } from '../services/VehicleModelService';
+import {
+  makeObservable,
+  observable,
+  action,
+  reaction,
+  runInAction,
+} from "mobx";
+import { vehicleMakeService } from "../services/VehicleMakeService";
+import { vehicleModelService } from "../services/VehicleModelService";
+import { getDocs } from "firebase/firestore";
 
 class VehicleStore {
   vehicleMakes = [];
@@ -10,33 +17,52 @@ class VehicleStore {
   currentPage = 1;
   itemsPerPage = 9;
   totalItems = 0;
+  filters = {};
+  sortBy = null;
+  sortOrder = "asc";
 
-  async loadVehicleMakes(filters = {}, sortBy = null, sortOrder = 'asc') {
+  async loadVehicleMakes() {
     try {
-      const vehicleMakes = await vehicleMakeService.getAllPaged(0, Infinity, filters, sortBy, sortOrder);
-      
+      const queryRef = vehicleMakeService.collection;
+      const filteredQueryRef = await vehicleMakeService.filterData(queryRef, this.filters);
+      const sortedQueryRef = await vehicleMakeService.sortData(filteredQueryRef, this.sortBy, this.sortOrder);
+      const data = await vehicleMakeService.getAll(sortedQueryRef);
       runInAction(() => {
-        this.vehicleMakes = vehicleMakes.data;
+        this.vehicleMakes = data;
       });
     } catch (error) {
-      console.error('Error loading vehicle makes:', error);
+      console.error("Error loading vehicle makes:", error);
     }
   }
   
-  async loadVehicleModels(filters = {}, sortBy = null, sortOrder = 'asc', page = 1) {
+  async loadVehicleModels() {
     try {
-      const startIdx = (page - 1) * this.itemsPerPage;
-      const endIdx = startIdx + this.itemsPerPage;
-  
-      const { data, total } = await vehicleModelService.getAllPaged(startIdx, endIdx, filters, sortBy, sortOrder);
-  
+      let queryRef = vehicleModelService.collection;
+      queryRef = await vehicleModelService.filterData(queryRef, this.filters);
+      queryRef = await vehicleModelService.sortData(queryRef, this.sortBy, this.sortOrder);
+      const data = await vehicleModelService.getAll(queryRef);
+      const totalItemsRef = vehicleModelService.collection; // Get reference to all documents
+      const totalItemsSnapshot = await getDocs(totalItemsRef); // Fetch all documents
+      const totalItems = totalItemsSnapshot.size; // Get total number of documents
       runInAction(() => {
         this.vehicleModels = data;
-        this.totalItems = total;
-        this.currentPage = page;
+        this.totalItems = totalItems; // Set totalItems to total number of documents
       });
     } catch (error) {
-      console.error('Error loading vehicle models:', error);
+      console.error("Error loading vehicle models:", error);
+    }
+  }
+
+  async loadPaginatedVehicleModels() {
+    try {
+      const data = await vehicleModelService.getPaginated(this.currentPage, this.itemsPerPage);
+      const totalItems = await vehicleModelService.getTotalCount();
+      runInAction(() => {
+        this.vehicleModels = data;
+        this.totalItems = totalItems;
+      });
+    } catch (error) {
+      console.error("Error loading paginated vehicle models:", error);
     }
   }
 
@@ -50,13 +76,9 @@ class VehicleStore {
         price: vehicle.price,
       };
       await vehicleModelService.add(vehicleModel);
-      vehicleModelService.onCollectionUpdate((data) => {
-        runInAction(() => {
-          this.vehicleModels = data;
-        });
-      });
+      // No need to update vehicleModels since onCollectionUpdate is handling it
     } catch (error) {
-      console.error('Error adding vehicle:', error);
+      console.error("Error adding vehicle:", error);
     }
   }
 
@@ -84,7 +106,7 @@ class VehicleStore {
       }
       await this.updateMake(existingVehicle.makeId, updatedVehicle.make);
     } catch (error) {
-      console.error('Error updating vehicle:', error);
+      console.error("Error updating vehicle:", error);
     }
   }
 
@@ -92,19 +114,21 @@ class VehicleStore {
     try {
       await vehicleMakeService.update(makeId, { name: newName });
     } catch (error) {
-      console.error('Error updating make:', error);
+      console.error("Error updating make:", error);
     }
   }
 
   async deleteVehicle(id) {
     try {
-      const vehicleToDelete = this.vehicleModels.find((vehicle) => vehicle.id === id);
+      const vehicleToDelete = this.vehicleModels.find(
+        (vehicle) => vehicle.id === id
+      );
       if (vehicleToDelete) {
         await vehicleModelService.delete(id);
         await vehicleMakeService.delete(vehicleToDelete.makeId);
       }
     } catch (error) {
-      console.error('Error deleting vehicle:', error);
+      console.error("Error deleting vehicle:", error);
     }
   }
 
@@ -113,7 +137,7 @@ class VehicleStore {
       const make = await vehicleMakeService.getById(id);
       return make;
     } catch (error) {
-      console.error('Error fetching make by ID:', error);
+      console.error("Error fetching make by ID:", error);
       return null;
     }
   }
@@ -138,10 +162,11 @@ class VehicleStore {
 
   setCurrentPage(page) {
     this.currentPage = page;
+    this.loadPaginatedVehicleModels();
   }
 
   calculateTotalPages() {
-    return Math.ceil(this.totalItems / this.itemsPerPage); // Correct calculation
+    return Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
   paginate(items) {
@@ -157,6 +182,9 @@ class VehicleStore {
       currentPage: observable,
       itemsPerPage: observable,
       totalItems: observable,
+      filters: observable,
+      sortBy: observable,
+      sortOrder: observable,
       loadVehicleMakes: action,
       loadVehicleModels: action,
       addVehicle: action,
@@ -164,6 +192,7 @@ class VehicleStore {
       deleteVehicle: action,
       getMakeById: action,
       getVehicleById: action,
+      loadPaginatedVehicleModels: action,
       setCurrentPage: action,
       calculateTotalPages: action,
       paginate: action,

@@ -1,12 +1,12 @@
 // src/components/VehicleList.jsx
 
-import React, { useEffect } from 'react'; // Removed useState import since setSortBy is not used
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
 import Paging from './Paging';
 
-const VehicleList = observer(() => {
+const VehicleList = observer(({ filterValue }) => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
@@ -14,25 +14,20 @@ const VehicleList = observer(() => {
     const fetchData = async () => {
       try {
         await vehicleStore.loadVehicleMakes();
-        await vehicleStore.loadVehicleModels();
+        await vehicleStore.loadVehicleModels({ search: filterValue });
       } catch (error) {
         console.error('Error loading data:', error);
       }
     };
     fetchData();
-
-    return () => {
-      // Cleanup function to reset currentPage when unmounting the component
-      vehicleStore.setCurrentPage(1);
-    };
-  }, [vehicleStore]); // Update effect dependency
+  }, [vehicleStore, filterValue]);
 
   const handleEditClick = (id) => {
     navigate(`/edit/${id}`);
   };
 
   const handlePageChange = async (page) => {
-    await vehicleStore.loadVehicleModels({}, null, page); // Removed sortBy parameter
+    await vehicleStore.setCurrentPage(page);
   };
 
   return (

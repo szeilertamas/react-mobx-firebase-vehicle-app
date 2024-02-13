@@ -14,12 +14,13 @@ function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState(null);
   const [sortOrder, setSortOrder] = useState('asc');
+  const [filterValue, setFilterValue] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         await vehicleStore.loadVehicleMakes();
-        await vehicleStore.loadVehicleModels({}, sortBy, sortOrder); // Pass sorting option
+        await vehicleStore.loadPaginatedVehicleModels();
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -28,17 +29,21 @@ function HomePage() {
     };
 
     fetchData();
-  }, [vehicleStore, sortBy, sortOrder]); // Update dependency
+  }, [vehicleStore]);
 
   const handleSortChange = async (newSort) => {
     if (newSort === sortBy) {
-      // Toggle sorting order if the same field is clicked again
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-      // Default to ascending order if a new sorting field is selected
+      console.log(newSort);
       setSortOrder('asc');
       setSortBy(newSort);
     }
+  };
+
+  const handleFilterChange = async (filterValue) => {
+    setFilterValue(filterValue); // Update filterValue state
+    await vehicleStore.loadVehicleModels({ search: filterValue }, sortBy, sortOrder);
   };
 
   return (
@@ -50,14 +55,13 @@ function HomePage() {
         style={{ maxWidth: "80%" }}
       >
         <AddVehicle />
-        <Filtering />
+        <Filtering onFilterChange={handleFilterChange} />
         <Sorting onSortChange={handleSortChange} />
       </div>
-      {/* Conditional rendering: if loading, display Loading component, otherwise display VehicleList */}
       {isLoading ? (
         <Loading />
       ) : (
-        <VehicleList />
+        <VehicleList filterValue={filterValue} />
       )}
     </div>
   );
