@@ -6,7 +6,7 @@ import { useRootStore } from '../stores/RootStore';
 import { useNavigate } from 'react-router-dom';
 import Paging from './Paging';
 
-const VehicleList = observer(({ filterValue }) => {
+const VehicleList = observer(({ filterValue, sortBy, sortOrder }) => {
   const { vehicleStore } = useRootStore();
   const navigate = useNavigate();
 
@@ -14,13 +14,13 @@ const VehicleList = observer(({ filterValue }) => {
     const fetchData = async () => {
       try {
         await vehicleStore.loadVehicleMakes();
-        await vehicleStore.loadVehicleModels({ search: filterValue });
+        await vehicleStore.loadVehicleModels({ search: filterValue, sortBy, sortOrder });
       } catch (error) {
         console.error('Error loading data:', error);
       }
     };
     fetchData();
-  }, [vehicleStore, filterValue]);
+  }, [vehicleStore, filterValue, sortBy, sortOrder]);
 
   const handleEditClick = (id) => {
     navigate(`/edit/${id}`);

@@ -14,8 +14,6 @@ function Sorting({ onSortChange }) {
         <option value="default">Sort by...</option>
         <option value="price">Price</option>
         <option value="year">Year</option>
-        <option value="make">Make</option>
-        <option value="model">Model</option>
       </select>
     </div>
   );

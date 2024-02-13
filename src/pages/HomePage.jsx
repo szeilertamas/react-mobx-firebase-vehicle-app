@@ -35,15 +35,15 @@ function HomePage() {
     if (newSort === sortBy) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-      console.log(newSort);
       setSortOrder('asc');
       setSortBy(newSort);
     }
+    await vehicleStore.loadVehicleModels({ search: filterValue, sortBy: newSort, sortOrder });
   };
 
   const handleFilterChange = async (filterValue) => {
-    setFilterValue(filterValue); // Update filterValue state
-    await vehicleStore.loadVehicleModels({ search: filterValue }, sortBy, sortOrder);
+    setFilterValue(filterValue); 
+    await vehicleStore.loadVehicleModels({ search: filterValue, sortBy, sortOrder });
   };
 
   return (
@@ -61,8 +61,8 @@ function HomePage() {
       {isLoading ? (
         <Loading />
       ) : (
-        <VehicleList filterValue={filterValue} />
-      )}
+        <VehicleList filterValue={filterValue} sortBy={sortBy} sortOrder={sortOrder} />
+        )}
     </div>
   );
 }

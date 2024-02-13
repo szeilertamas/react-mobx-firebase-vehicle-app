@@ -35,11 +35,11 @@ class VehicleStore {
     }
   }
   
-  async loadVehicleModels() {
+  async loadVehicleModels({ search, sortBy, sortOrder }) {
     try {
       let queryRef = vehicleModelService.collection;
       queryRef = await vehicleModelService.filterData(queryRef, this.filters);
-      queryRef = await vehicleModelService.sortData(queryRef, this.sortBy, this.sortOrder);
+      queryRef = await vehicleModelService.sortData(queryRef, sortBy, sortOrder); // Update this line
       const data = await vehicleModelService.getAll(queryRef);
       const totalItemsRef = vehicleModelService.collection; // Get reference to all documents
       const totalItemsSnapshot = await getDocs(totalItemsRef); // Fetch all documents
