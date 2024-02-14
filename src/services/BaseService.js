@@ -19,9 +19,11 @@ import { db } from '../utils/firebaseConfig';
 
 class BaseService {
   constructor(collectionName) {
+    // Initialize the Firestore collection
     this.collection = collection(db, collectionName);
   }
 
+  // Sort the data based on sortBy and sortOrder
   async sortData(queryRef, sortBy, sortOrder) {
     if (sortBy) {
       return query(queryRef, orderBy(sortBy, sortOrder));
@@ -29,6 +31,7 @@ class BaseService {
     return queryRef;
   }
 
+  // Filter the data based on the provided filters
   async filterData(queryRef, filters) {
     let filteredQueryRef = queryRef;
     for (const key in filters) {
@@ -37,6 +40,7 @@ class BaseService {
     return filteredQueryRef;
   }
 
+  // Paginate the data based on startAfterDoc and limitCount
   async paginateData(queryRef, startAfterDoc, limitCount) {
     if (startAfterDoc) {
       queryRef = query(queryRef, startAfter(startAfterDoc));
@@ -45,6 +49,7 @@ class BaseService {
     return queryRef;
   }
 
+  // Retrieve all documents from the query reference
   async getAll(queryRef) {
     try {
       const querySnapshot = await getDocs(queryRef);
@@ -59,17 +64,20 @@ class BaseService {
     }
   }
 
+  // Retrieve a single document by ID
   async getById(id) {
     const docRef = doc(this.collection, id);
     const docSnap = await getDoc(docRef);
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
   }
 
+  // Add a new document to the collection
   async add(data) {
     const docRef = await addDoc(this.collection, data);
     return { id: docRef.id, ...data };
   }
 
+  // Update an existing document
   async update(id, data) {
     const docRef = doc(this.collection, id);
     try {
@@ -81,12 +89,14 @@ class BaseService {
     }
   }
 
+  // Delete a document by ID
   async delete(id) {
     const docRef = doc(this.collection, id);
     await deleteDoc(docRef);
     return id;
   }
 
+  // Retrieve paginated data
   async getPaginated(page, limit) {
     const startAt = (page - 1) * limit;
     const querySnapshot = await this.collection.orderBy('name').startAt(startAt).limit(limit).get();
@@ -97,11 +107,13 @@ class BaseService {
     return data;
   }
 
+  // Get the total count of documents in the collection
   async getTotalCount() {
     const querySnapshot = await this.collection.get();
     return querySnapshot.size;
   }
 
+  // Listen for updates to the collection
   onCollectionUpdate(callback) {
     return onSnapshot(this.collection, (querySnapshot) => {
       const data = [];

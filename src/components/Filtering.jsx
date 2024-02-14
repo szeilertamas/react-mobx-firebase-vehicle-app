@@ -14,7 +14,6 @@ function Filtering({ onFilterChange }) {
   const handleResetFilter = () => {
     setFilterValue('');
     onFilterChange('');
-    console.log('Filter reset');
   };
 
   return (

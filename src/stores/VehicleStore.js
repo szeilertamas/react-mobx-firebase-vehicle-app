@@ -21,6 +21,7 @@ class VehicleStore {
   sortBy = null;
   sortOrder = "asc";
 
+  // Load vehicle makes from the database
   async loadVehicleMakes() {
     try {
       const queryRef = vehicleMakeService.collection;
@@ -35,24 +36,26 @@ class VehicleStore {
     }
   }
   
-  async loadVehicleModels({ search, sortBy, sortOrder }) {
+  // Load vehicle models with pagination and sorting
+  async loadVehicleModels({ sortBy, sortOrder }) {
     try {
       let queryRef = vehicleModelService.collection;
       queryRef = await vehicleModelService.filterData(queryRef, this.filters);
-      queryRef = await vehicleModelService.sortData(queryRef, sortBy, sortOrder); // Update this line
+      queryRef = await vehicleModelService.sortData(queryRef, sortBy, sortOrder);
       const data = await vehicleModelService.getAll(queryRef);
-      const totalItemsRef = vehicleModelService.collection; // Get reference to all documents
-      const totalItemsSnapshot = await getDocs(totalItemsRef); // Fetch all documents
-      const totalItems = totalItemsSnapshot.size; // Get total number of documents
+      const totalItemsRef = vehicleModelService.collection;
+      const totalItemsSnapshot = await getDocs(totalItemsRef);
+      const totalItems = totalItemsSnapshot.size;
       runInAction(() => {
         this.vehicleModels = data;
-        this.totalItems = totalItems; // Set totalItems to total number of documents
+        this.totalItems = totalItems;
       });
     } catch (error) {
       console.error("Error loading vehicle models:", error);
     }
   }
 
+  // Load paginated vehicle models
   async loadPaginatedVehicleModels() {
     try {
       const data = await vehicleModelService.getPaginated(this.currentPage, this.itemsPerPage);
@@ -66,6 +69,7 @@ class VehicleStore {
     }
   }
 
+  // Add a new vehicle
   async addVehicle(vehicle) {
     try {
       const make = await vehicleMakeService.add({ name: vehicle.make });
@@ -76,24 +80,21 @@ class VehicleStore {
         price: vehicle.price,
       };
       await vehicleModelService.add(vehicleModel);
-      // No need to update vehicleModels since onCollectionUpdate is handling it
     } catch (error) {
       console.error("Error adding vehicle:", error);
     }
   }
 
+  // Update an existing vehicle
   async updateVehicle(id, updatedVehicle) {
     try {
-      const existingVehicle = await vehicleModelService.getById(id);
-      if (!existingVehicle) {
-        console.error(`Vehicle with ID ${id} not found.`);
-        return;
-      }
+      // Update vehicle model
       await vehicleModelService.update(id, {
         name: updatedVehicle.model,
         price: updatedVehicle.price,
         year: updatedVehicle.year,
       });
+      // Update make if provided
       if (updatedVehicle.makeId) {
         const make = await vehicleMakeService.getById(updatedVehicle.makeId);
         if (make) {
@@ -104,12 +105,15 @@ class VehicleStore {
           console.error(`Make with ID ${updatedVehicle.makeId} not found.`);
         }
       }
+      // Update make name in case it's changed
+      const existingVehicle = await vehicleModelService.getById(id);
       await this.updateMake(existingVehicle.makeId, updatedVehicle.make);
     } catch (error) {
       console.error("Error updating vehicle:", error);
     }
   }
 
+  // Update make name
   async updateMake(makeId, newName) {
     try {
       await vehicleMakeService.update(makeId, { name: newName });
@@ -118,6 +122,7 @@ class VehicleStore {
     }
   }
 
+  // Delete a vehicle
   async deleteVehicle(id) {
     try {
       const vehicleToDelete = this.vehicleModels.find(
@@ -132,6 +137,7 @@ class VehicleStore {
     }
   }
 
+  // Get make by ID
   async getMakeById(id) {
     try {
       const make = await vehicleMakeService.getById(id);
@@ -142,6 +148,7 @@ class VehicleStore {
     }
   }
 
+  // Get vehicle by ID
   getVehicleById(id) {
     let foundVehicle = this.vehicleModels.find((vehicle) => vehicle.id === id);
 
@@ -160,15 +167,18 @@ class VehicleStore {
     return foundVehicle;
   }
 
+  // Set current page for pagination
   setCurrentPage(page) {
     this.currentPage = page;
     this.loadPaginatedVehicleModels();
   }
 
+  // Calculate total pages based on total items and items per page
   calculateTotalPages() {
     return Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
+  // Paginate items
   paginate(items) {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
