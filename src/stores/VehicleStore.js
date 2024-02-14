@@ -1,91 +1,103 @@
 // src/stores/VehicleStore.js
 
-import { makeObservable, observable, action, reaction, runInAction } from 'mobx';
-import { vehicleMakeService } from '../services/VehicleMakeService';
-import { vehicleModelService } from '../services/VehicleModelService';
+import {
+  makeObservable,
+  observable,
+  action,
+  reaction,
+  runInAction,
+} from "mobx";
+import { vehicleMakeService } from "../services/VehicleMakeService";
+import { vehicleModelService } from "../services/VehicleModelService";
+import { getDocs } from "firebase/firestore";
 
 class VehicleStore {
   vehicleMakes = [];
   vehicleModels = [];
   currentPage = 1;
   itemsPerPage = 9;
+  totalItems = 0;
+  filters = {};
+  sortBy = null;
+  sortOrder = "asc";
 
-  // Method to asynchronously load vehicle makes from the database
+  // Load vehicle makes from the database
   async loadVehicleMakes() {
     try {
-      // Listening for updates to vehicle makes collection and updating the observable array
-      vehicleMakeService.onCollectionUpdate((data) => {
-        runInAction(() => {
-          this.vehicleMakes = data; // Updating vehicleMakes array
-        });
+      const queryRef = vehicleMakeService.collection;
+      const filteredQueryRef = await vehicleMakeService.filterData(queryRef, this.filters);
+      const sortedQueryRef = await vehicleMakeService.sortData(filteredQueryRef, this.sortBy, this.sortOrder);
+      const data = await vehicleMakeService.getAll(sortedQueryRef);
+      runInAction(() => {
+        this.vehicleMakes = data;
       });
     } catch (error) {
-      console.error('Error loading vehicle makes:', error);
+      console.error("Error loading vehicle makes:", error);
     }
   }
-
-  // Method to asynchronously load vehicle models from the database
-  async loadVehicleModels() {
+  
+  // Load vehicle models with pagination and sorting
+  async loadVehicleModels({ sortBy, sortOrder }) {
     try {
-      // Listening for updates to vehicle models collection and updating the observable array
-      vehicleModelService.onCollectionUpdate((data) => {
-        runInAction(() => {
-          this.vehicleModels = data; // Updating vehicleModels array
-        });
+      let queryRef = vehicleModelService.collection;
+      queryRef = await vehicleModelService.filterData(queryRef, this.filters);
+      queryRef = await vehicleModelService.sortData(queryRef, sortBy, sortOrder);
+      const data = await vehicleModelService.getAll(queryRef);
+      const totalItemsRef = vehicleModelService.collection;
+      const totalItemsSnapshot = await getDocs(totalItemsRef);
+      const totalItems = totalItemsSnapshot.size;
+      runInAction(() => {
+        this.vehicleModels = data;
+        this.totalItems = totalItems;
       });
     } catch (error) {
-      console.error('Error loading vehicle models:', error);
+      console.error("Error loading vehicle models:", error);
     }
   }
 
-  // Method to add a new vehicle to the database
+  // Load paginated vehicle models
+  async loadPaginatedVehicleModels() {
+    try {
+      const data = await vehicleModelService.getPaginated(this.currentPage, this.itemsPerPage);
+      const totalItems = await vehicleModelService.getTotalCount();
+      runInAction(() => {
+        this.vehicleModels = data;
+        this.totalItems = totalItems;
+      });
+    } catch (error) {
+      console.error("Error loading paginated vehicle models:", error);
+    }
+  }
+
+  // Add a new vehicle
   async addVehicle(vehicle) {
     try {
       const make = await vehicleMakeService.add({ name: vehicle.make });
-      // Creating a new vehicle model object
       const vehicleModel = {
         makeId: make.id,
         name: vehicle.model,
         year: vehicle.year,
         price: vehicle.price,
       };
-      // Adding the vehicle model to the vehicle models collection
       await vehicleModelService.add(vehicleModel);
-
-      // Listening for updates to vehicle models collection and updating the observable array
-      vehicleModelService.onCollectionUpdate((data) => {
-        runInAction(() => {
-          this.vehicleModels = data; // Updating vehicleModels array
-        });
-      });
     } catch (error) {
-      console.error('Error adding vehicle:', error);
+      console.error("Error adding vehicle:", error);
     }
   }
 
-  // Method to update a vehicle in the database
+  // Update an existing vehicle
   async updateVehicle(id, updatedVehicle) {
     try {
-      // Getting the existing vehicle from the database
-      const existingVehicle = await vehicleModelService.getById(id);
-      if (!existingVehicle) {
-        console.error(`Vehicle with ID ${id} not found.`);
-        return;
-      }
-
-      // Updating the vehicle details in the database
+      // Update vehicle model
       await vehicleModelService.update(id, {
         name: updatedVehicle.model,
         price: updatedVehicle.price,
         year: updatedVehicle.year,
       });
-
-      // Checking if the make of the vehicle has been updated
+      // Update make if provided
       if (updatedVehicle.makeId) {
-        // Getting the make document from the database
         const make = await vehicleMakeService.getById(updatedVehicle.makeId);
         if (make) {
-          // Updating the make details in the database
           await vehicleMakeService.update(updatedVehicle.makeId, {
             name: updatedVehicle.make,
           });
@@ -93,79 +105,80 @@ class VehicleStore {
           console.error(`Make with ID ${updatedVehicle.makeId} not found.`);
         }
       }
+      // Update make name in case it's changed
+      const existingVehicle = await vehicleModelService.getById(id);
       await this.updateMake(existingVehicle.makeId, updatedVehicle.make);
     } catch (error) {
-      console.error('Error updating vehicle:', error);
+      console.error("Error updating vehicle:", error);
     }
   }
 
-    // Method to update the name of a make in the database
+  // Update make name
   async updateMake(makeId, newName) {
     try {
       await vehicleMakeService.update(makeId, { name: newName });
     } catch (error) {
-      console.error('Error updating make:', error);
+      console.error("Error updating make:", error);
     }
   }
 
-  // Method to delete a vehicle from the database
+  // Delete a vehicle
   async deleteVehicle(id) {
     try {
-      // Finding the vehicle to delete from the observable array
-      const vehicleToDelete = this.vehicleModels.find((vehicle) => vehicle.id === id);
+      const vehicleToDelete = this.vehicleModels.find(
+        (vehicle) => vehicle.id === id
+      );
       if (vehicleToDelete) {
-        // Deleting the vehicle from the database
         await vehicleModelService.delete(id);
-        // Deleting the make of the vehicle from the database
         await vehicleMakeService.delete(vehicleToDelete.makeId);
       }
     } catch (error) {
-      console.error('Error deleting vehicle:', error);
+      console.error("Error deleting vehicle:", error);
     }
   }
 
-  // Method to fetch a make by its ID from the database
+  // Get make by ID
   async getMakeById(id) {
     try {
       const make = await vehicleMakeService.getById(id);
       return make;
     } catch (error) {
-      console.error('Error fetching make by ID:', error);
+      console.error("Error fetching make by ID:", error);
       return null;
     }
   }
 
-  // Method to get a vehicle by its ID from the observable array
+  // Get vehicle by ID
   getVehicleById(id) {
     let foundVehicle = this.vehicleModels.find((vehicle) => vehicle.id === id);
 
     if (!foundVehicle) {
-      // Reacting to changes in the observable array and updating foundVehicle
       const disposer = reaction(
         () => this.vehicleModels.find((vehicle) => vehicle.id === id),
         (updatedVehicle) => {
           if (updatedVehicle) {
             foundVehicle = updatedVehicle;
-            disposer(); // Disposing the reaction to avoid memory leaks
+            disposer();
           }
         }
       );
     }
 
-    return foundVehicle; // Returning the found vehicle
+    return foundVehicle;
   }
 
-  // Method to set the current page for paging
+  // Set current page for pagination
   setCurrentPage(page) {
     this.currentPage = page;
+    this.loadPaginatedVehicleModels();
   }
 
-  // Method to calculate the total number of pages for paging
+  // Calculate total pages based on total items and items per page
   calculateTotalPages() {
-    return Math.ceil(this.vehicleModels.length / this.itemsPerPage);
+    return Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
-  // Method to paginate the items based on the current page
+  // Paginate items
   paginate(items) {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
@@ -178,6 +191,10 @@ class VehicleStore {
       vehicleModels: observable,
       currentPage: observable,
       itemsPerPage: observable,
+      totalItems: observable,
+      filters: observable,
+      sortBy: observable,
+      sortOrder: observable,
       loadVehicleMakes: action,
       loadVehicleModels: action,
       addVehicle: action,
@@ -185,6 +202,7 @@ class VehicleStore {
       deleteVehicle: action,
       getMakeById: action,
       getVehicleById: action,
+      loadPaginatedVehicleModels: action,
       setCurrentPage: action,
       calculateTotalPages: action,
       paginate: action,

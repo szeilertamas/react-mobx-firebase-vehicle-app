@@ -11,15 +11,16 @@ import Navbar from '../components/Navbar';
 
 function HomePage() {
   const { vehicleStore } = useRootStore();
-  const [sortingOption, setSortingOption] = useState("default");
-  const [filterValue, setFilterValue] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [filterValue, setFilterValue] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         await vehicleStore.loadVehicleMakes();
-        await vehicleStore.loadVehicleModels();
+        await vehicleStore.loadPaginatedVehicleModels();
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -30,19 +31,19 @@ function HomePage() {
     fetchData();
   }, [vehicleStore]);
 
-  // Function to handle sort change
-  const handleSortChange = (sortOption) => {
-    setSortingOption(sortOption);
+  const handleSortChange = async (newSort) => {
+    if (newSort === sortBy) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortOrder('asc');
+      setSortBy(newSort);
+    }
+    await vehicleStore.loadVehicleModels({ search: filterValue, sortBy: newSort, sortOrder });
   };
 
-  // Function to handle filter change
-  const handleFilterChange = (value) => {
-    setFilterValue(value);
-  };
-
-  // Function to handle resetting filter
-  const handleResetFilter = () => {
-    setFilterValue("");
+  const handleFilterChange = async (filterValue) => {
+    setFilterValue(filterValue); 
+    await vehicleStore.loadVehicleModels({ search: filterValue, sortBy, sortOrder });
   };
 
   return (
@@ -54,22 +55,14 @@ function HomePage() {
         style={{ maxWidth: "80%" }}
       >
         <AddVehicle />
-        <Filtering
-          onFilterChange={handleFilterChange}
-          onResetFilter={handleResetFilter}
-        />
+        <Filtering onFilterChange={handleFilterChange} />
         <Sorting onSortChange={handleSortChange} />
       </div>
-      {/* Conditional rendering: if loading, display Loading component, otherwise display VehicleList */}
       {isLoading ? (
         <Loading />
       ) : (
-        <VehicleList
-          sortingOption={sortingOption}
-          filterValue={filterValue}
-          setIsLoading={setIsLoading}
-        />
-      )}
+        <VehicleList filterValue={filterValue} sortBy={sortBy} sortOrder={sortOrder} />
+        )}
     </div>
   );
 }
